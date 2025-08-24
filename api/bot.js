@@ -2,7 +2,8 @@ export default async function handler(req, res) {
   // === CONFIG ===
   const TOKEN = process.env.TG_TOKEN || "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // better: set di Vercel Env (TG_TOKEN)
   const OWNER_NAME = "Vinzz Official";
-  const OWNER_CONTACT = "@vinzz_official_store"; // ganti
+  const OWNER_CONTACT = "@vinzz_official_store";
+  const WHATSAPP_CONTACT = "wa.me/62815247824152"
 
   const API = `https://api.telegram.org/bot${TOKEN}`;
 
@@ -22,7 +23,7 @@ export default async function handler(req, res) {
         await sendHTML(
           chat_id,
           `<b>👋 Halo!</b>\n` +
-            `Selamat datang di <b>Vinzz Utility Bot</b> 🚀\n` +
+            `Selamat datang di <b>nakano miku multi device</b> 🚀\n` + `<b>Version:</b> 2.0.0\n` +
             `Pilih menu di bawah untuk mulai.`,
           startKeyboard()
         );
@@ -34,12 +35,20 @@ export default async function handler(req, res) {
           chat_id,
           `📌 <b>Bantuan</b>\n\n` +
             `• /start — buka menu utama\n` +
-            `• Gunakan tombol <b>IP Tracker</b> di menu utama`
+            `• Pilih tombol untuk fitur`
         );
         return ok(res);
       }
 
-      // hanya proses kalau user balas ke Force Reply dari IP Tracker
+     
+if (
+  update.message.reply_to_message &&
+  /APK Search/.test(update.message.reply_to_message.text || "")
+) {
+  const query = text;
+  await handleApkSearch(chat_id, query);
+  return ok(res);
+}
       if (
         update.message.reply_to_message &&
         /Masukkan IP atau domain/.test(
@@ -74,7 +83,7 @@ export default async function handler(req, res) {
           chat_id,
           message_id,
           `<b>👋 Halo!</b>\n` +
-            `Selamat datang di <b>Vinzz Utility Bot</b> 🚀\n` +
+            `Selamat datang di <b>nakano miku multi device</b> 🚀\n` + `<b>Version:</b> 2.0.0\n` +
             `Pilih menu di bawah untuk mulai.`,
           startKeyboard()
         );
@@ -86,8 +95,7 @@ export default async function handler(req, res) {
           chat_id,
           message_id,
           `ℹ️ <b>Tentang Bot</b>\n\n` +
-            `Bot dengan fitur <b>IP Tracker</b>, info Owner, tautan Website, dan lainnya.\n` +
-            `Stack: <code>Node.js + Vercel Serverless</code>`,
+            `Bot multi fungsi yang di kembangkan oleh <b>Vinzz Official</b> dengan banyak fitur tampa <b>limit</b>.\n`,
           aboutKeyboard()
         );
         return ok(res);
@@ -100,7 +108,7 @@ export default async function handler(req, res) {
           `👤 <b>Owner</b>\n` +
             `Nama: <b>${OWNER_NAME}</b>\n` +
             `Kontak: <b>${OWNER_CONTACT}</b>\n` +
-            `Website: <a href="${WEBSITE_URL}">${WEBSITE_URL}</a>`,
+            `Whatsapp: ${WHATSAPP_CONTACT}`,
           backKeyboard()
         );
         return ok(res);
@@ -112,13 +120,21 @@ export default async function handler(req, res) {
           message_id,
           `🧩 <b>Fitur</b>\n\n` +
             `• IP Tracker (IP/Domain → lokasi, ASN, ISP, koordinat)\n` +
-            `• Tautan Website & Info Owner\n` +
-            `• UI dengan inline button, foto header\n\n` +
-            `Klik <b>IP Tracker</b> untuk mencoba.`,
+            `• APK mod search`,
           featuresKeyboard()
         );
         return ok(res);
       }
+      
+      if (data === "apnehisjeneh") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "🔍 <b>APK Search</b>\nMasukkan kata kunci aplikasi/game yang ingin dicari:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
 
 
       if (data === "ipksnwikwns") {
@@ -144,17 +160,52 @@ export default async function handler(req, res) {
   }
 
   // ========= HELPERS =========
+  async function handleApkSearch(chat_id, query) {
+  try {
+    await sendHTML(chat_id, `🔎 Mencari: <code>${escapeHTML(query)}</code> ...`);
+
+    const r = await fetch(
+      `https://api.siputzx.my.id/api/apk/an1?search=${encodeURIComponent(query)}`
+    );
+    const j = await r.json();
+
+    if (!j || !j.result || j.result.length === 0) {
+      await sendHTML(chat_id, `❌ Tidak ada hasil untuk: <code>${escapeHTML(query)}</code>`);
+      return;
+    }
+
+    // ambil maksimal 5 hasil pertama biar gak spam
+    const results = j.result.slice(0, 5);
+
+    for (const item of results) {
+      const caption =
+        `📱 <b>${escapeHTML(item.title || "-")}</b>\n` +
+        (item.category ? `Kategori: ${escapeHTML(item.category)}\n` : "") +
+        (item.version ? `Versi: ${escapeHTML(item.version)}\n` : "") +
+        (item.size ? `Size: ${escapeHTML(item.size)}\n` : "") +
+        (item.link ? `🔗 <a href="${item.link}">Download</a>\n` : "");
+
+      if (item.thumbnail) {
+        await sendPhoto(chat_id, item.thumbnail, caption);
+      } else {
+        await sendHTML(chat_id, caption);
+      }
+    }
+  } catch (err) {
+    console.error("APK Search error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal mencari aplikasi. Coba lagi nanti.");
+  }
+}
 
   function startKeyboard() {
     return mkInline([
-      [{ text: "🛰 IP Tracker", callback_data: "ipksnwikwns" }],
       [
         { text: "🧩 Fitur", callback_data: "feaksnwikwns" },
         { text: "ℹ️ About", callback_data: "abksnwikwns" },
       ],
       [
         { text: "👤 Owner", callback_data: "owksnwikwns" },
-            { text: "🌐 Website", url: "https://free-panels-pterodactyl.netlify.app" }
+            { text: "🪀 Whatsapp", url: "https://wa.me/62815247824152" }
       ],
     ]);
   }
@@ -166,6 +217,7 @@ export default async function handler(req, res) {
   function featuresKeyboard() {
     return mkInline([
       [{ text: "🛰 IP Tracker", callback_data: "ipksnwikwns" }],
+      [{ text: "🔍 Apk Mod", callback_data: "apnehisjeneh" }],
       [{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }],
     ]);
   }
@@ -351,4 +403,4 @@ export default async function handler(req, res) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-        }
+    }
