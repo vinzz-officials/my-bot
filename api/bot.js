@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+Instragram default async function handler(req, res) {
   // === CONFIG ===
   const TOKEN = process.env.TG_TOKEN || "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // disarankan: gunakan env var TG_TOKEN
   const OWNER_NAME = "Vinzz Official";
@@ -76,7 +76,7 @@ if (update.message.reply_to_message) {
       
             if (
         update.message.reply_to_message &&
-        /Masukkan username Instragram/.test(update.message.reply_to_message.text || "")
+        /Masukkan username Instagram/.test(update.message.reply_to_message.text || "")
       ) {
         const username = text.replace(/^@/, ""); 
         await handleIGStalk(chat_id, username);
