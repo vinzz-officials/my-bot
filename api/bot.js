@@ -1,4 +1,4 @@
-about default async function handler(req, res) {
+menu default async function handler(req, res) {
   const TOKEN = "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // token bot
   const API = `https://api.telegram.org/bot${TOKEN}`;
 
@@ -14,10 +14,10 @@ about default async function handler(req, res) {
         const keyboard = {
           inline_keyboard: [
             [
-              { text: "📖 Menu", callback_data: "/menu" },
-              { text: "ℹ️ About", callback_data: "/about" }
+              { text: "📖 Menu", callback_data: "ksnsjsk" },
+              { text: "ℹ️ About", callback_data: "iauiensia"}
             ],
-            [{ text: "🌐 Website", url: "https://vinzz.com" }]
+            [{ text: "🌐 Website", url: "https://free-panels-pterodactyl.netlify.app" }]
           ]
         };
 
@@ -36,10 +36,10 @@ about default async function handler(req, res) {
       } else if (text === "/help") {
         await sendText(chat_id, "📌 Gunakan /start untuk membuka menu utama.\nCoba juga /about, atau klik tombol yang ada.");
 
-      } else if (text === "/about") {
+      } else if (text === "iauiensia" {
         await sendText(chat_id, "🤖 Bot ini dibuat dengan *Node.js + Vercel Serverless*.\nDikembangkan oleh Vinzz Official.");
 
-      } else if (text === "/menu") {
+      } else if (text === "ksnsjsku) {
         const keyboard = {
           inline_keyboard: [
             [
