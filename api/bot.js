@@ -74,13 +74,15 @@ export default async function handler(req, res) {
         await editOrSend(
           chat_id,
           message_id,
-          `<b>📋 Menu Utama</b>\nPilih salah satu:`,
+          `<b>👋 Halo!</b>\n` +
+            `Selamat datang di <b>Vinzz Utility Bot</b> 🚀\n` +
+            `Pilih menu di bawah untuk mulai.`,
           startKeyboard()
         );
         return ok(res);
       }
 
-      if (data === "about") {
+      if (data === "abksnwikwns") {
         await editOrSend(
           chat_id,
           message_id,
@@ -92,7 +94,7 @@ export default async function handler(req, res) {
         return ok(res);
       }
 
-      if (data === "owner") {
+      if (data === "owksnwikwns") {
         await editOrSend(
           chat_id,
           message_id,
@@ -105,7 +107,7 @@ export default async function handler(req, res) {
         return ok(res);
       }
 
-      if (data === "features") {
+      if (data === "feaksnwikwns") {
         await editOrSend(
           chat_id,
           message_id,
@@ -124,7 +126,7 @@ export default async function handler(req, res) {
         return ok(res);
       }
 
-      if (data === "iptracker") {
+      if (data === "ipksnwikwns") {
         // minta user balas dengan IP/domain via Force Reply
         await requestIpInput(chat_id);
         return ok(res);
@@ -150,14 +152,14 @@ export default async function handler(req, res) {
 
   function startKeyboard() {
     return mkInline([
-      [{ text: "🛰 IP Tracker", callback_data: "iptracker" }],
+      [{ text: "🛰 IP Tracker", callback_data: "ipksnwikwns" }],
       [
-        { text: "🧩 Fitur", callback_data: "features" },
-        { text: "ℹ️ About", callback_data: "about" },
+        { text: "🧩 Fitur", callback_data: "feaksnwikwns" },
+        { text: "ℹ️ About", callback_data: "abksnwikwns" },
       ],
       [
-        { text: "👤 Owner", callback_data: "owner" },
-        { text: "🌐 Website", callback_data: "website" },
+        { text: "👤 Owner", callback_data: "owksnwikwns" },
+            [{ text: "🌐 Website", url: "https://free-panels-pterodactyl.netlify.app" }]
       ],
     ]);
   }
@@ -168,7 +170,7 @@ export default async function handler(req, res) {
 
   function featuresKeyboard() {
     return mkInline([
-      [{ text: "🛰 IP Tracker", callback_data: "iptracker" }],
+      [{ text: "🛰 IP Tracker", callback_data: "ipksnwikwns" }],
       [{ text: "⬅️ Kembali", callback_data: "menu" }],
     ]);
   }
@@ -354,4 +356,4 @@ export default async function handler(req, res) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-        }
+      }
