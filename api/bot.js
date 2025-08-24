@@ -373,14 +373,19 @@ async function handleTiktokStalk(chat_id, username) {
       }
 
       const u = json.data;
-
+      const verified = u.is_verified ? `✅` : `❌`;
+      const priv = u.is_private ? `✅` : `❌`;
+      const bisnis = u.is_business_account ? `✅` : `❌`;
+      const bio = u.biography
+  ? `📝 Bio: ${escapeHTML(u.biography)}\n`
+  : `📝 Bio: Tidak ada`;
       const caption =
         `🔎 <b>Instagram Profile</b>\n\n` +
-        `👤 <b>${escapeHTML(u.fullname || "-")}</b>\n` +
+        `👤 <b>${escapeHTML(u.full_name || "-")}</b>\n` +
         `🔗 @${escapeHTML(u.username)}\n` +
-        (u.signature ? `📝 Bio: ${escapeHTML(u.biography)}\n` : "") +
-        (u.is_verified ? `✔️ Verified\n` : "") + (u.is_private ? `🔑 Private\n` : "") + (u.is_business_account ? `📇 Business Account\n` : "") + (u
-        ? `\n👥 Followers: ${u.follower_count}\n` +
+        bio  +
+        `✔️ Verified: ${verified}\n` + `🔑 Private: ${priv}\n` + `📇 Business Account: ${bisnis}\n` + (u
+        ? `\n👥 Followers: ${u.followers_count}\n` +
             `👤 Following: ${u.following_count}\n` +
             `🎬 Videos: ${u.posts_count}\n`
           : "");
@@ -816,4 +821,4 @@ async function handleRobloxStalk(chat_id, username) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-                                           }
+}
