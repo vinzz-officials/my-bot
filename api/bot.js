@@ -1,4 +1,4 @@
-nicknadefault async function handler(req, res) {
+export default async function handler(req, res) {
   // === CONFIG ===
   const TOKEN = process.env.TG_TOKEN || "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // disarankan: gunakan env var TG_TOKEN
   const OWNER_NAME = "Vinzz Official";
@@ -85,7 +85,8 @@ if (update.message.reply_to_message) {
       }
 
       if (
-        update.message.reply_to_messanicknamme        /Masukkan IP atau domain/.test(update.message.reply_to_message.text || "")
+        update.message.reply_to_message &&
+        /Masukkan IP atau domain/.test(update.message.reply_to_message.text || "")
       ) {
         const target = text;
         await handleIpLookup(chat_id, target);
@@ -408,7 +409,7 @@ async function handleTiktokPhotoDownload(chat_id, url) {
         return;
       }
 
-      // Buat caption gabungan
+      // Buat caption 
       const caption = `📸 <b>TikTok foto</b>\n👤 Creator: ${escapeHTML(json.data.creator || "-")}`;
 
       // Kirim semua foto sekaligus sebagai media_group
@@ -680,4 +681,4 @@ async function handleTiktokPhotoDownload(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-          }
+                  }
