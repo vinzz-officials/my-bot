@@ -1,11 +1,11 @@
 export default async function handler(req, res) {
-  const TOKEN = "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // isi token bot
+  const TOKEN = "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // token bot
   const API = `https://api.telegram.org/bot${TOKEN}`;
 
   if (req.method === "POST") {
     const update = req.body;
 
-    // kalau user kirim pesan teks
+    // pesan teks
     if (update.message) {
       const chat_id = update.message.chat.id;
       const text = update.message.text;
@@ -17,9 +17,7 @@ export default async function handler(req, res) {
               { text: "📖 Menu", callback_data: "menu" },
               { text: "ℹ️ About", callback_data: "about" }
             ],
-            [
-              { text: "🌐 Website", url: "https://vinzz.com" }
-            ]
+            [{ text: "🌐 Website", url: "https://vinzz.com" }]
           ]
         };
 
@@ -28,9 +26,10 @@ export default async function handler(req, res) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             chat_id,
-            text: "👋 Halo, selamat datang di *Bot Vercel PHP Style* 🚀\n\nPilih menu di bawah:",
+            text: "👋 Halo, selamat datang di *Bot Vinzz berbasis php* 🚀\n\nPilih menu di bawah:",
             parse_mode: "Markdown",
-            reply_markup: keyboard
+            // 👉 WAJIB: stringify biar tombol tampil normal
+            reply_markup: JSON.stringify(keyboard)
           })
         });
 
@@ -39,7 +38,7 @@ export default async function handler(req, res) {
 
       } else if (text === "/about") {
         await sendText(chat_id, "🤖 Bot ini dibuat dengan *Node.js + Vercel Serverless*.\nDikembangkan oleh Vinzz Official.");
-      
+
       } else if (text === "/menu") {
         const keyboard = {
           inline_keyboard: [
@@ -47,9 +46,7 @@ export default async function handler(req, res) {
               { text: "🔊 Fitur 1", callback_data: "fitur1" },
               { text: "📂 Fitur 2", callback_data: "fitur2" }
             ],
-            [
-              { text: "🎲 Random", callback_data: "random" }
-            ]
+            [{ text: "🎲 Random", callback_data: "random" }]
           ]
         };
 
@@ -59,19 +56,26 @@ export default async function handler(req, res) {
           body: JSON.stringify({
             chat_id,
             text: "📖 Daftar Menu Fitur:\n\n1. Fitur 1\n2. Fitur 2\n3. Random Generator",
-            reply_markup: keyboard
+            // 👉 WAJIB: stringify
+            reply_markup: JSON.stringify(keyboard)
           })
         });
 
-      }/* else {
-        await sendText(chat_id, `Kamu ngetik: *${text}*`);
-      }*/
+      }
+      // non-command dibiarkan diam (no reply)
     }
 
-    // kalau user klik tombol callback
+    // klik tombol (callback)
     if (update.callback_query) {
       const chat_id = update.callback_query.message.chat.id;
       const data = update.callback_query.data;
+
+      // 👉 WAJIB: jawab callback biar tombol ga stuck putih
+      await fetch(`${API}/answerCallbackQuery`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ callback_query_id: update.callback_query.id })
+      });
 
       if (data === "menu") {
         await sendText(chat_id, "📖 Kamu membuka Menu utama!");
@@ -90,18 +94,15 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
-  res.status(200).send("OK");
+  // GET / ping
+  return res.status(200).send("OK");
 
-  // helper function buat kirim text
+  // helper kirim text
   async function sendText(chat_id, text) {
     await fetch(`${API}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id,
-        text,
-        parse_mode: "Markdown"
-      })
+      body: JSON.stringify({ chat_id, text, parse_mode: "Markdown" })
     });
   }
-            }
+}
