@@ -41,7 +41,22 @@ export default async function handler(req, res) {
         return ok(res);
       }
 
-      // Reply handlers (Force Reply)
+      // ===== REPLY HANDLER =====
+if (update.message.reply_to_message) {
+  const repliedText = update.message.reply_to_message.text || "";
+  const url = text.trim();
+
+  if (/TikTok Video Download/.test(repliedText)) {
+    await handleTiktokVideoDownload(chat_id, url);
+    return ok(res);
+  }
+
+  if (/TikTok Photo\/Slideshow Download/.test(repliedText)) {
+    await handleTiktokPhotoDownload(chat_id, url);
+    return ok(res);
+  }
+}
+
       if (
         update.message.reply_to_message &&
         /Masukkan username TikTok/.test(update.message.reply_to_message.text || "")
@@ -157,6 +172,26 @@ export default async function handler(req, res) {
         return ok(res);
       }
       
+if (data === "tikdlvideo") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "⬇️ <b>TikTok Video Download</b>\nKirim link TikTok video di bawah ini:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
+
+if (data === "tikdlfoto") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "📸 <b>TikTok Photo/Slideshow Download</b>\nKirim link TikTok slideshow/foto di bawah ini:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
+      
       if (data === "apnehisjeneh") {
   await tg("sendMessage", {
     chat_id,
@@ -215,21 +250,23 @@ export default async function handler(req, res) {
     ]);
   }
 
-  function aboutKeyboard() {
-    return mkInline([[{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }]]);
-  }
-
   function featuresKeyboard() {
-    return mkInline([
-      [
-        { text: "🛰 IP Tracker", callback_data: "ipksnwikwns" },
-        { text: "🔍 Apk Mod", callback_data: "apnehisjeneh" },
-      ],
-      [{ text: "📷 Pinterest", callback_data: "pinaknshians" }],
-      [{ text: "🎵 TikTok Stalk", callback_data: "tikkbakakwnjs" }],
-      [{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }],
-    ]);
-  }
+  return mkInline([
+    [
+      { text: "🛰 IP Tracker", callback_data: "ipksnwikwns" },
+      { text: "🔍 Apk Mod", callback_data: "apnehisjeneh" }
+    ],
+    [
+      { text: "📷 Pinterest", callback_data: "pinaknshians" },
+      { text: "🎵 TikTok Stalk", callback_data: "tikkbakakwnjs" }
+    ],
+    [
+      { text: "⬇️ TikTok Video", callback_data: "tikdlvideo" },
+      { text: "📸 TikTok Foto", callback_data: "tikdlfoto" }
+    ],
+    [{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }]
+  ]);
+}
 
   function backKeyboard() {
     return mkInline([[{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }]]);
@@ -292,7 +329,6 @@ async function handleApkSearch(chat_id, query) {
       return;
     }
 
-    // ambil maksimal 5 hasil pertama biar gak spam
     const results = json.data.slice(0, 5);
 
     for (const item of results) {
@@ -312,6 +348,75 @@ async function handleApkSearch(chat_id, query) {
   } catch (err) {
     console.error("APK Search error:", err);
     await sendHTML(chat_id, "⚠️ Gagal mencari aplikasi. Coba lagi nanti.");
+  }
+}
+
+
+async function handleTiktokVideoDownload(chat_id, url) {
+  try {
+    await sendHTML(chat_id, "⏳ Sedang memproses TikTok video...");
+
+    const res = await fetch(
+      `https://api.vreden.my.id/api/tiktok?url=${encodeURIComponent(url)}`
+    );
+    const json = await res.json();
+
+    if (!json?.result?.status) {
+      await sendHTML(chat_id, "❌ Gagal mengambil data TikTok. Pastikan link valid.");
+      return;
+    }
+
+    const { result } = json;
+    const videoData = result.data?.[0]; // ambil video pertama (nowatermark)
+    if (!videoData || !videoData.url) {
+      await sendHTML(chat_id, "⚠️ Tidak ada video ditemukan di link tersebut.");
+      return;
+    }
+
+    await tg("sendVideo", {
+      chat_id,
+      video: videoData.url,
+      caption: `🎥 <b>${escapeHTML(result.title || "Video TikTok")}</b>\n👤 Creator: ${escapeHTML(result.author?.nickname || "-")}`,
+      parse_mode: "HTML",
+    });
+  } catch (err) {
+    console.error("TikTok Video Download error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal mendownload video. Coba lagi nanti.");
+  }
+}
+
+async function handleTiktokPhotoDownload(chat_id, url) {
+  try {
+    await sendHTML(chat_id, "⏳ Sedang memproses TikTok foto...");
+
+    const res = await fetch(
+      `https://api.siputzx.my.id/api/d/tiktok?url=${encodeURIComponent(url)}`
+    );
+    const json = await res.json();
+
+    if (!json || !json.status) {
+      await sendHTML(chat_id, "❌ Gagal mengambil data TikTok. Pastikan link valid.");
+      return;
+    }
+
+    const { type, urls } = json.data;
+
+    if (type === "slideshow") {
+      const images = urls || [];
+      if (images.length === 0) {
+        await sendHTML(chat_id, "⚠️ Tidak ada foto ditemukan di slideshow.");
+        return;
+      }
+
+      for (const img of images.slice(0, 20)) {
+        await sendPhoto(chat_id, img, "📸 TikTok Photo");
+      }
+    } else {
+      await sendHTML(chat_id, "⚠️ Link ini bukan slideshow/foto TikTok.");
+    }
+  } catch (err) {
+    console.error("TikTok Photo Download error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal mendownload foto. Coba lagi nanti.");
   }
 }
 
