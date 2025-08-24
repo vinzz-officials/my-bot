@@ -367,7 +367,7 @@ async function handleTiktokStalk(chat_id, username) {
       );
       const json = await res.json();
 
-      if (!json || !json.status || !json.data?.user) {
+      if (!json || !json.status || !json.data) {
         await sendHTML(chat_id, `❌ Tidak ada data untuk username <code>${escapeHTML(username)}</code>`);
         return;
       }
@@ -816,4 +816,4 @@ async function handleRobloxStalk(chat_id, username) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-          }
+                                           }
