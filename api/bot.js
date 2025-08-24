@@ -51,7 +51,7 @@ if (update.message.reply_to_message) {
     return ok(res);
   }
 
-  if (/TikTok Photo\/Slideshow Download/.test(repliedText)) {
+  if (/TikTok Photo Download/.test(repliedText)) {
     await handleTiktokPhotoDownload(chat_id, url);
     return ok(res);
   }
@@ -185,7 +185,7 @@ if (data === "tikvidnaikaniwn") {
 if (data === "tikfotnaikaniwn") {
   await tg("sendMessage", {
     chat_id,
-    text: "📸 <b>TikTok Photo/Slideshow Download</b>\nKirim link TikTok slideshow/foto di bawah ini:",
+    text: "📸 <b>TikTok Photo Download</b>\nKirim link TikTok foto di bawah ini:",
     parse_mode: "HTML",
     reply_markup: JSON.stringify({ force_reply: true, selective: true }),
   });
@@ -402,18 +402,30 @@ async function handleTiktokPhotoDownload(chat_id, url) {
     const { type, urls } = json.data;
 
     if (type === "slideshow") {
-      const images = (json.data.urls || []).map(a => a[0]).filter(Boolean);
+      const images = (urls || []).map(a => a[0]).filter(Boolean);
 
-if (images.length === 0) {
-  await sendHTML(chat_id, "⚠️ Tidak ada foto ditemukan di slideshow.");
-  return;
-}
+      if (images.length === 0) {
+        await sendHTML(chat_id, "⚠️ Tidak ada foto ditemukan di slideshow.");
+        return;
+      }
 
-for (const img of images.slice(0,20)) {
-  await sendPhoto(chat_id, img, "📸 TikTok Photo");
-}
+      // Buat caption gabungan
+      const caption = `📸 <b>TikTok foto</b>\n👤 Creator: ${escapeHTML(json.data.author?.nickname || "-")}`;
+
+      // Kirim semua foto sekaligus sebagai media_group
+      const media = images.slice(0, 20).map((img, i) => ({
+        type: "photo",
+        media: img,
+        caption: i === 0 ? caption : undefined, // caption hanya di foto pertama
+        parse_mode: "HTML",
+      }));
+
+      await tg("sendMediaGroup", {
+        chat_id,
+        media,
+      });
     } else {
-      await sendHTML(chat_id, "⚠️ Link ini bukan slideshow/foto TikTok.");
+      await sendHTML(chat_id, "⚠️ Link ini bukan foto TikTok.");
     }
   } catch (err) {
     console.error("TikTok Photo Download error:", err);
