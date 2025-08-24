@@ -14,8 +14,8 @@ about default async function handler(req, res) {
         const keyboard = {
           inline_keyboard: [
             [
-              { text: "📖 Menu", callback_data: "menu" },
-              { text: "ℹ️ About", callback_data: "menut" }
+              { text: "📖 Menu", callback_data: "/menu" },
+              { text: "ℹ️ About", callback_data: "/about" }
             ],
             [{ text: "🌐 Website", url: "https://vinzz.com" }]
           ]
@@ -76,10 +76,9 @@ about default async function handler(req, res) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ callback_query_id: update.callback_query.id })
       });
-
-      if (data === "menu") {
+menu   if (data === "/menu") {
         await sendText(chat_id, "📖 Kamu membuka Menu utama!");
-      } else if (data === "about") {
+      } else if (data === "/about") {
         await sendText(chat_id, "ℹ️ Ini adalah bot contoh dengan fitur tombol interaktif.");
       } else if (data === "fitur1") {
         await sendText(chat_id, "🔊 Ini fitur 1 (contoh: kirim suara, musik, dll).");
