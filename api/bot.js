@@ -1,4 +1,4 @@
-menu default async function handler(req, res) {
+default async function handler(req, res) {
   const TOKEN = "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // token bot
   const API = `https://api.telegram.org/bot${TOKEN}`;
 
