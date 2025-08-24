@@ -1,4 +1,4 @@
-default async function handler(req, res) {
+export default async function handler(req, res) {
   // === CONFIG ===
   const TOKEN = process.env.TG_TOKEN || "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // disarankan: gunakan env var TG_TOKEN
   const OWNER_NAME = "Vinzz Official";
