@@ -42,6 +42,14 @@ export default async function handler(req, res) {
       }
 
       // ===== REPLY HANDLER =====
+      if (update.message.reply_to_message &&
+    /Masukkan username Roblox/.test(update.message.reply_to_message.text || "")
+) {
+  const username = text.trim();
+  await handleRobloxStalk(chat_id, username);
+  return ok(res);
+}
+
 if (update.message.reply_to_message) {
   const repliedText = update.message.reply_to_message.text || "";
   const url = text.trim();
@@ -63,6 +71,15 @@ if (update.message.reply_to_message) {
       ) {
         const username = text.replace(/^@/, ""); // hapus @ kalau ada
         await handleTiktokStalk(chat_id, username);
+        return ok(res);
+      }
+      
+            if (
+        update.message.reply_to_message &&
+        /Masukkan username Instragram/.test(update.message.reply_to_message.text || "")
+      ) {
+        const username = text.replace(/^@/, ""); 
+        await handleIGStalk(chat_id, username);
         return ok(res);
       }
       
@@ -98,6 +115,16 @@ if (update.message.reply_to_message) {
     }
 
     // ========= CALLBACK BUTTON =========
+    if (data === "robiwjwjkwmsj") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "🎮 <b>Roblox Stalk</b>\nMasukkan username Roblox:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
+
     if (update.callback_query) {
       const cq = update.callback_query;
       const chat_id = cq.message.chat.id;
@@ -154,14 +181,25 @@ if (update.message.reply_to_message) {
           message_id,
           `🧩 <b>Fitur</b>\n\n` +
             `• IP Tracker (IP/Domain → lokasi, ASN, ISP, koordinat)\n` +
-            `• APK search\n` +
-            `• Pinterest search\n` + `• Tiktok stalk\n` + `• Tiktok download video\n` + `• Tiktok download foto`,
+            `• APK Search\n` +
+            `• Pinterest search\n` + `• Tiktok stalk\n` + `• Tiktok Download Video\n` + `• Tiktok Download Foto\n` + `• Roblox Stalk\n` + `• IG Stalk`,
           featuresKeyboard()
         );
         return ok(res);
       }
 
-       if (data === "tikkbakakwnjs") {
+       if (data === "igkwnakke") {
+        await tg("sendMessage", {
+          chat_id,
+          text:
+            "🎵 <b>IG Stalk</b>\nMasukkan username Instagram (contoh: <code>mrbeast</code>):",
+          parse_mode: "HTML",
+          reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+        });
+        return ok(res);
+      }
+      
+      if (data === "tikkbakakwnjs") {
         await tg("sendMessage", {
           chat_id,
           text:
@@ -264,6 +302,10 @@ if (data === "tikfotnaikaniwn") {
       { text: "⬇️ TikTok Video", callback_data: "tikvidnaikaniwn" },
       { text: "📸 TikTok Foto", callback_data: "tikfotnaikaniwn" }
     ],
+    [
+  { text: "🎮 Roblox Stalk", callback_data: "robiwjwjkwmsj" },
+    { text: "🔎 Instagram Stalk", callback_data: "igkwnakke" }
+],
     [{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }]
   ]);
 }
@@ -312,6 +354,44 @@ async function handleTiktokStalk(chat_id, username) {
     } catch (err) {
       console.error("TikTok Stalk error:", err);
       await sendHTML(chat_id, "⚠️ Gagal mengambil data TikTok. Coba lagi nanti.");
+    }
+  }
+  
+  async function handleIGStalk(chat_id, username) {
+    try {
+      await sendHTML(chat_id, `🔎 Mencari info Instagram: <code>${escapeHTML(username)}</code> ...`);
+
+      const res = await fetch(
+        `https://api.siputzx.my.id/api/stalk/instagram?username=${encodeURIComponent(username)}`
+      );
+      const json = await res.json();
+
+      if (!json || !json.status || !json.data?.user) {
+        await sendHTML(chat_id, `❌ Tidak ada data untuk username <code>${escapeHTML(username)}</code>`);
+        return;
+      }
+
+      const u = json.data;
+
+      const caption =
+        `🔎 <b>Instagram Profile</b>\n\n` +
+        `👤 <b>${escapeHTML(u.fullname || "-")}</b>\n` +
+        `🔗 @${escapeHTML(u.username)}\n` +
+        (u.signature ? `📝 Bio: ${escapeHTML(u.biography)}\n` : "") +
+        (u.is_verified ? `✔️ Verified\n` : "") + (u.is_private ? `🔑 Private\n` : "") + (u.is_business_account ? `📇 Business Account\n` : "") + (u
+        ? `\n👥 Followers: ${u.follower_count}\n` +
+            `👤 Following: ${u.following_count}\n` +
+            `🎬 Videos: ${u.posts_count}\n`
+          : "");
+
+      if (u.profile_pic_url) {
+        await sendPhoto(chat_id, u.profile_pic_url, caption);
+      } else {
+        await sendHTML(chat_id, caption);
+      }
+    } catch (err) {
+      console.error("IG Stalk error:", err);
+      await sendHTML(chat_id, "⚠️ Gagal mengambil data IG. Coba lagi nanti.");
     }
   }
   
@@ -496,6 +576,59 @@ async function handleTiktokPhotoDownload(chat_id, url) {
     }
   }
 
+async function handleRobloxStalk(chat_id, username) {
+  try {
+    await sendHTML(chat_id, `🔎 Mencari info Roblox: <code>${escapeHTML(username)}</code> ...`);
+
+    const res = await fetch(
+      `https://api.siputzx.my.id/api/stalk/roblox?user=${encodeURIComponent(username)}`
+    );
+    const json = await res.json();
+
+    if (!json || !json.status || !json.data) {
+      await sendHTML(chat_id, `❌ Tidak ada data untuk username <code>${escapeHTML(username)}</code>`);
+      return;
+    }
+
+    const u = json.data;
+
+    // Deskripsi utama
+    const basic = u.basic || {};
+    const social = u.social || {};
+    const presence = u.presence?.userPresences?.[0] || {};
+    const avatar = u.avatar?.headshot?.data?.[0]?.imageUrl || null;
+    const bannedStatus = basic.isBanned ? "Ya" : "Tidak";
+
+    // Groups singkat
+    const groups = (u.groups?.list?.data || []).map(g => `• ${escapeHTML(g.group.name)} (Role: ${escapeHTML(g.role.name)})`).join("\n");
+
+    // Achievements badges
+    const badges = (u.achievements?.robloxBadges || []).map(b => `• ${escapeHTML(b.name)}`).join("\n");
+
+    const caption =
+      `👤 <b>${escapeHTML(basic.displayName || basic.name || "-")}</b>\n` +
+      `🆔 UserID: <code>${basic.id}</code>\n` +
+      `📄 Bio: ${escapeHTML(basic.description || "-")}\n` +
+      `📝 Akun dibuat: ${basic.created ? new Date(basic.created).toLocaleString() : "-"}\n` +
+      `⛔ Banned: ${bannedStatus}\n` +
+      `🌐 Last presence: ${escapeHTML(presence.lastLocation || "-")}\n\n` +
+      `👥 Followers: ${social.followers?.count || 0}\n` +
+      `👤 Following: ${social.following?.count || 0}\n` +
+      `🤝 Friends: ${social.friends?.count || 0}\n\n` +
+      `🏢 Groups:\n${groups || "-"}` +
+      (badges ? `\n\n🏅 Badges:\n${badges}` : "");
+
+    if (avatar) {
+      await sendPhoto(chat_id, avatar, caption);
+    } else {
+      await sendHTML(chat_id, caption);
+    }
+
+  } catch (err) {
+    console.error("Roblox Stalk error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal mengambil data Roblox. Coba lagi nanti.");
+  }
+}
   
   async function requestIpInput(chat_id) {
     const payload = {
@@ -682,4 +815,4 @@ async function handleTiktokPhotoDownload(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-                  }
+    }
