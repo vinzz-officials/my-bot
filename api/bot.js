@@ -408,7 +408,7 @@ async function handleTiktokPhotoDownload(chat_id, url) {
         return;
       }
 
-      for (const img of images.slice(0, 10)) {
+      for (const img of images.slice(0, 5)) {
         await sendPhoto(chat_id, img, "📸 TikTok Photo");
       }
     } else {
