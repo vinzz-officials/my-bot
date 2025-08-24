@@ -76,7 +76,7 @@ about default async function handler(req, res) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ callback_query_id: update.callback_query.id })
       });
-menu   if (data === "/menu") {
+  if (data === "/menu") {
         await sendText(chat_id, "📖 Kamu membuka Menu utama!");
       } else if (data === "/about") {
         await sendText(chat_id, "ℹ️ Ini adalah bot contoh dengan fitur tombol interaktif.");
