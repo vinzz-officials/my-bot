@@ -115,15 +115,6 @@ if (update.message.reply_to_message) {
     }
 
     // ========= CALLBACK BUTTON =========
-    if (data === "robiwjwjkwmsj") {
-  await tg("sendMessage", {
-    chat_id,
-    text: "🎮 <b>Roblox Stalk</b>\nMasukkan username Roblox:",
-    parse_mode: "HTML",
-    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
-  });
-  return ok(res);
-}
 
     if (update.callback_query) {
       const cq = update.callback_query;
@@ -187,6 +178,16 @@ if (update.message.reply_to_message) {
         );
         return ok(res);
       }
+
+if (data === "robiwjwjkwmsj") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "🎮 <b>Roblox Stalk</b>\nMasukkan username Roblox:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
 
        if (data === "igkwnakke") {
         await tg("sendMessage", {
@@ -815,4 +816,4 @@ async function handleRobloxStalk(chat_id, username) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-    }
+          }
