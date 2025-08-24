@@ -138,17 +138,14 @@ export default async function handler(req, res) {
       }
 
       if (data === "apnehisjeneh") {
-        // Fitur dinonaktifkan
-        await tg("sendMessage", {
-          chat_id,
-          text:
-            "🚫 <b>APK Search dinonaktifkan</b>\n" +
-            "Maaf, aku nggak bisa bantu cari atau distribusi APK mod/bajakan. " +
-            "Sebagai alternatif, coba cari aplikasi open-source di F-Droid: https://f-droid.org",
-          parse_mode: "HTML",
-        });
-        return ok(res);
-      }
+  await tg("sendMessage", {
+    chat_id,
+    text: "🔍 <b>APK Search</b>\nMasukkan kata kunci aplikasi/game yang ingin dicari:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
 
       if (data === "pinaknshians") {
         await tg("sendMessage", {
@@ -503,4 +500,4 @@ async function handleApkSearch(chat_id, query) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-    }
+            }
