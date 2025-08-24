@@ -105,7 +105,7 @@ export default async function handler(req, res) {
           chat_id,
           message_id,
           `ℹ️ <b>Tentang Bot</b>\n\n` +
-            `Bot multi fungsi yang dikembangkan oleh <b>Vinzz Official</b> dengan banyak fitur tanpa <b>limit</b>.`,
+            `Bot multi fungsi yang berjalan tanpa batas 24/7 yang bisa bertahan hampir selamanya, dikembangkan oleh <b>Vinzz Official</b> dengan banyak fitur tanpa <b>limit</b>.`,
           aboutKeyboard()
         );
         return ok(res);
@@ -130,7 +130,7 @@ export default async function handler(req, res) {
           message_id,
           `🧩 <b>Fitur</b>\n\n` +
             `• IP Tracker (IP/Domain → lokasi, ASN, ISP, koordinat)\n` +
-            `• APK search (dinonaktifkan)\n` +
+            `• APK search\n` +
             `• Pinterest search`,
           featuresKeyboard()
         );
@@ -500,4 +500,4 @@ async function handleApkSearch(chat_id, query) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-            }
+      }
