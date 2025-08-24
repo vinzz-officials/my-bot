@@ -1,9 +1,9 @@
 export default async function handler(req, res) {
   // === CONFIG ===
-  const TOKEN = process.env.TG_TOKEN || "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // better: set di Vercel Env (TG_TOKEN)
+  const TOKEN = process.env.TG_TOKEN || "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // disarankan: gunakan env var TG_TOKEN
   const OWNER_NAME = "Vinzz Official";
   const OWNER_CONTACT = "@vinzz_official_store";
-  const WHATSAPP_CONTACT = "wa.me/62815247824152"
+  const WHATSAPP_CONTACT = "wa.me/62815247824152";
 
   const API = `https://api.telegram.org/bot${TOKEN}`;
 
@@ -23,7 +23,8 @@ export default async function handler(req, res) {
         await sendHTML(
           chat_id,
           `<b>👋 Halo!</b>\n` +
-            `Selamat datang di <b>nakano miku multi device</b> 🚀\n` + `<b>Version:</b> 2.0.0\n` +
+            `Selamat datang di <b>nakano miku multi device</b> 🚀\n` +
+            `<b>Version:</b> 2.0.0\n` +
             `Pilih menu di bawah untuk mulai.`,
           startKeyboard()
         );
@@ -40,20 +41,28 @@ export default async function handler(req, res) {
         return ok(res);
       }
 
-     
-if (
-  update.message.reply_to_message &&
-  /APK Search/.test(update.message.reply_to_message.text || "")
-) {
-  const query = text;
-  await handleApkSearch(chat_id, query);
-  return ok(res);
-}
+      // Reply handlers (Force Reply)
       if (
         update.message.reply_to_message &&
-        /Masukkan IP atau domain/.test(
-          update.message.reply_to_message.text || ""
-        )
+        /APK Search/.test(update.message.reply_to_message.text || "")
+      ) {
+        const query = text;
+        await handleApkSearch(chat_id, query);
+        return ok(res);
+      }
+
+      if (
+        update.message.reply_to_message &&
+        /Pinterest search/.test(update.message.reply_to_message.text || "")
+      ) {
+        const query = text;
+        await handlePinterestSearch(chat_id, query);
+        return ok(res);
+      }
+
+      if (
+        update.message.reply_to_message &&
+        /Masukkan IP atau domain/.test(update.message.reply_to_message.text || "")
       ) {
         const target = text;
         await handleIpLookup(chat_id, target);
@@ -83,7 +92,8 @@ if (
           chat_id,
           message_id,
           `<b>👋 Halo!</b>\n` +
-            `Selamat datang di <b>nakano miku multi device</b> 🚀\n` + `<b>Version:</b> 2.0.0\n` +
+            `Selamat datang di <b>nakano miku multi device</b> 🚀\n` +
+            `<b>Version:</b> 2.0.0\n` +
             `Pilih menu di bawah untuk mulai.`,
           startKeyboard()
         );
@@ -95,7 +105,7 @@ if (
           chat_id,
           message_id,
           `ℹ️ <b>Tentang Bot</b>\n\n` +
-            `Bot multi fungsi yang di kembangkan oleh <b>Vinzz Official</b> dengan banyak fitur tampa <b>limit</b>.\n`,
+            `Bot multi fungsi yang dikembangkan oleh <b>Vinzz Official</b> dengan banyak fitur tanpa <b>limit</b>.`,
           aboutKeyboard()
         );
         return ok(res);
@@ -106,9 +116,9 @@ if (
           chat_id,
           message_id,
           `👤 <b>Owner</b>\n` +
-            `Nama: <b>${OWNER_NAME}</b>\n` +
-            `Kontak: <b>${OWNER_CONTACT}</b>\n` +
-            `Whatsapp: ${WHATSAPP_CONTACT}`,
+            `Nama: <b>${escapeHTML(OWNER_NAME)}</b>\n` +
+            `Kontak: ${escapeHTML(OWNER_CONTACT)}\n` +
+            `Whatsapp: ${escapeHTML(WHATSAPP_CONTACT)}`,
           backKeyboard()
         );
         return ok(res);
@@ -120,22 +130,36 @@ if (
           message_id,
           `🧩 <b>Fitur</b>\n\n` +
             `• IP Tracker (IP/Domain → lokasi, ASN, ISP, koordinat)\n` +
-            `• APK mod search`,
+            `• APK search (dinonaktifkan)\n` +
+            `• Pinterest search`,
           featuresKeyboard()
         );
         return ok(res);
       }
-      
-      if (data === "apnehisjeneh") {
-  await tg("sendMessage", {
-    chat_id,
-    text: "🔍 <b>APK Search</b>\nMasukkan kata kunci aplikasi/game yang ingin dicari:",
-    parse_mode: "HTML",
-    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
-  });
-  return ok(res);
-}
 
+      if (data === "apnehisjeneh") {
+        // Fitur dinonaktifkan
+        await tg("sendMessage", {
+          chat_id,
+          text:
+            "🚫 <b>APK Search dinonaktifkan</b>\n" +
+            "Maaf, aku nggak bisa bantu cari atau distribusi APK mod/bajakan. " +
+            "Sebagai alternatif, coba cari aplikasi open-source di F-Droid: https://f-droid.org",
+          parse_mode: "HTML",
+        });
+        return ok(res);
+      }
+
+      if (data === "pinaknshians") {
+        await tg("sendMessage", {
+          chat_id,
+          text:
+            "📷 <b>Pinterest search</b>\nMasukkan judul foto yang ingin dicari:",
+          parse_mode: "HTML",
+          reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+        });
+        return ok(res);
+      }
 
       if (data === "ipksnwikwns") {
         // minta user balas dengan IP/domain via Force Reply
@@ -160,7 +184,7 @@ if (
   }
 
   // ========= HELPERS =========
-  
+
   function startKeyboard() {
     return mkInline([
       [
@@ -169,7 +193,7 @@ if (
       ],
       [
         { text: "👤 Owner", callback_data: "owksnwikwns" },
-            { text: "🪀 Whatsapp", url: "https://wa.me/62815247824152" }
+        { text: "🪀 Whatsapp", url: "https://wa.me/62815247824152" },
       ],
     ]);
   }
@@ -180,8 +204,11 @@ if (
 
   function featuresKeyboard() {
     return mkInline([
-      [{ text: "🛰 IP Tracker", callback_data: "ipksnwikwns" }],
-      [{ text: "🔍 Apk Mod", callback_data: "apnehisjeneh" }],
+      [
+        { text: "🛰 IP Tracker", callback_data: "ipksnwikwns" },
+        { text: "🔍 Apk Mod", callback_data: "apnehisjeneh" },
+      ],
+      [{ text: "📷 Pinterest", callback_data: "pinaknshians" }],
       [{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }],
     ]);
   }
@@ -189,6 +216,8 @@ if (
   function backKeyboard() {
     return mkInline([[{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }]]);
   }
+
+  // ====== FEATURE HANDLERS ======
 
 async function handleApkSearch(chat_id, query) {
   try {
@@ -227,11 +256,73 @@ async function handleApkSearch(chat_id, query) {
   }
 }
 
+  async function handlePinterestSearch(chat_id, query) {
+    try {
+      await sendHTML(
+        chat_id,
+        `🔎 Mencari gambar Pinterest untuk: <code>${escapeHTML(query)}</code> ...`
+      );
+
+      const res = await fetch(
+        `https://api.siputzx.my.id/api/s/pinterest?query=${encodeURIComponent(
+          query
+        )}&type=image`
+      );
+      const json = await res.json();
+
+      if (!json || !json.data || json.data.length === 0) {
+        await sendHTML(
+          chat_id,
+          `❌ Tidak ada hasil Pinterest untuk: <code>${escapeHTML(
+            query
+          )}</code>`
+        );
+        return;
+      }
+
+      const results = json.data.slice(0, 5); // batas maksimal 5 biar gak spam
+
+      for (const item of results) {
+        const caption =
+          `📌 <b>${escapeHTML(
+            item.grid_title || item.description || "Tanpa judul"
+          )}</b>\n` +
+          (item.pinner?.full_name
+            ? `👤 ${escapeHTML(item.pinner.full_name)} (@${escapeHTML(
+                item.pinner.username
+              )})\n`
+            : "") +
+          (item.board?.name
+            ? `📂 Board: ${escapeHTML(item.board.name)}\n`
+            : "") +
+          (item.reaction_counts?.["1"]
+            ? `❤️ ${item.reaction_counts["1"]} likes\n`
+            : "") +
+          (item.pin ? `🔗 <a href="${item.pin}">Lihat di Pinterest</a>` : "");
+
+        const img =
+          item.image_url || item.images || item.url || item.image || null;
+
+        if (img) {
+          await sendPhoto(chat_id, img, caption);
+        } else {
+          await sendHTML(chat_id, caption);
+        }
+      }
+    } catch (err) {
+      console.error("Pinterest Search error:", err);
+      await sendHTML(
+        chat_id,
+        "⚠️ Gagal mencari di Pinterest. Coba lagi nanti."
+      );
+    }
+  }
 
   async function requestIpInput(chat_id) {
     const payload = {
       chat_id,
-      text: "🛰 <b>IP Tracker</b>\nMasukkan IP atau domain (contoh: <code>1.1.1.1</code> atau <code>google.com</code>) lalu kirim balasan ini.",
+      text:
+        "🛰 <b>IP Tracker</b>\nMasukkan IP atau domain (contoh: <code>1.1.1.1</code> atau <code>google.com</code>) lalu kirim balasan ini.",
       parse_mode: "HTML",
       reply_markup: JSON.stringify({ force_reply: true, selective: true }),
     };
@@ -274,15 +365,17 @@ async function handleApkSearch(chat_id, query) {
     }
     if (info.org || info.asn)
       lines.push(`ASN/Org: ${[info.asn, info.org].filter(Boolean).join(" / ")}`);
-    if (info.isp) lines.push(`ISP: ${info.isp}`);
+    if (info.isp) lines.push(`ISP: ${escapeHTML(info.isp)}`);
     if (
       typeof info.latitude !== "undefined" &&
       typeof info.longitude !== "undefined"
     ) {
       lines.push(`Koordinat: ${info.latitude}, ${info.longitude}`);
-      lines.push(`Map: https://maps.google.com/?q=${info.latitude},${info.longitude}`);
+      lines.push(
+        `Map: https://maps.google.com/?q=${info.latitude},${info.longitude}`
+      );
     }
-    if (info.timezone) lines.push(`Zona Waktu: ${info.timezone}`);
+    if (info.timezone) lines.push(`Zona Waktu: ${escapeHTML(info.timezone)}`);
     if (typeof info.proxy !== "undefined")
       lines.push(`Proxy/VPN: ${info.proxy ? "Ya" : "Tidak"}`);
 
@@ -290,7 +383,8 @@ async function handleApkSearch(chat_id, query) {
   }
 
   async function toIP(target) {
-    const ipRegex = /^(?:\d{1,3}\.){3}\d{1,3}$/;
+    const ipRegex =
+      /^(?:\d{1,3}\.){3}\d{1,3}$/; // IPv4 sederhana (tanpa validasi 0-255)
     if (ipRegex.test(target)) return target;
     try {
       const r = await fetch(
@@ -350,6 +444,8 @@ async function handleApkSearch(chat_id, query) {
     return null;
   }
 
+  // ====== UTIL ======
+
   function mkInline(inline_keyboard) {
     return JSON.stringify({ inline_keyboard });
   }
@@ -399,10 +495,12 @@ async function handleApkSearch(chat_id, query) {
     return String(s)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-          }
+    }
