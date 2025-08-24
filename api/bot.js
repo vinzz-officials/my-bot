@@ -155,7 +155,7 @@ if (update.message.reply_to_message) {
           `🧩 <b>Fitur</b>\n\n` +
             `• IP Tracker (IP/Domain → lokasi, ASN, ISP, koordinat)\n` +
             `• APK search\n` +
-            `• Pinterest search`,
+            `• Pinterest search\n` + `• Tiktok stalk\n` + `• Tiktok download video\n` + `• Tiktok download foto`,
           featuresKeyboard()
         );
         return ok(res);
@@ -172,7 +172,7 @@ if (update.message.reply_to_message) {
         return ok(res);
       }
       
-if (data === "tikdlvideo") {
+if (data === "tikvidnaikaniwn") {
   await tg("sendMessage", {
     chat_id,
     text: "⬇️ <b>TikTok Video Download</b>\nKirim link TikTok video di bawah ini:",
@@ -182,7 +182,7 @@ if (data === "tikdlvideo") {
   return ok(res);
 }
 
-if (data === "tikdlfoto") {
+if (data === "tikfotnaikaniwn") {
   await tg("sendMessage", {
     chat_id,
     text: "📸 <b>TikTok Photo/Slideshow Download</b>\nKirim link TikTok slideshow/foto di bawah ini:",
@@ -261,8 +261,8 @@ if (data === "tikdlfoto") {
       { text: "🎵 TikTok Stalk", callback_data: "tikkbakakwnjs" }
     ],
     [
-      { text: "⬇️ TikTok Video", callback_data: "tikdlvideo" },
-      { text: "📸 TikTok Foto", callback_data: "tikdlfoto" }
+      { text: "⬇️ TikTok Video", callback_data: "tikvidnaikaniwn" },
+      { text: "📸 TikTok Foto", callback_data: "tikfotnaikaniwn" }
     ],
     [{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }]
   ]);
@@ -408,7 +408,7 @@ async function handleTiktokPhotoDownload(chat_id, url) {
         return;
       }
 
-      for (const img of images.slice(0, 20)) {
+      for (const img of images.slice(0, 10)) {
         await sendPhoto(chat_id, img, "📸 TikTok Photo");
       }
     } else {
@@ -668,4 +668,4 @@ async function handleTiktokPhotoDownload(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-          }
+}
