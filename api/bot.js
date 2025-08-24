@@ -130,7 +130,7 @@ if (update.message.reply_to_message) {
           message_id,
           `ℹ️ <b>Tentang Bot</b>\n\n` +
             `Bot multi fungsi yang berjalan tanpa batas 24/7 yang bisa bertahan hampir selamanya, dikembangkan oleh <b>Vinzz Official</b> dengan banyak fitur tanpa <b>limit</b>.`,
-          aboutKeyboard()
+          backKeyboard()
         );
         return ok(res);
       }
