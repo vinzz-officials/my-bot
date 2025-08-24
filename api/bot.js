@@ -402,15 +402,16 @@ async function handleTiktokPhotoDownload(chat_id, url) {
     const { type, urls } = json.data;
 
     if (type === "slideshow") {
-      const images = urls || [];
-      if (images.length === 0) {
-        await sendHTML(chat_id, "⚠️ Tidak ada foto ditemukan di slideshow.");
-        return;
-      }
+      const images = (json.data.urls || []).map(a => a[0]).filter(Boolean);
 
-      for (const img of images.slice(0, 5)) {
-        await sendPhoto(chat_id, img, "📸 TikTok Photo");
-      }
+if (images.length === 0) {
+  await sendHTML(chat_id, "⚠️ Tidak ada foto ditemukan di slideshow.");
+  return;
+}
+
+for (const img of images.slice(0,20)) {
+  await sendPhoto(chat_id, img, "📸 TikTok Photo");
+}
     } else {
       await sendHTML(chat_id, "⚠️ Link ini bukan slideshow/foto TikTok.");
     }
@@ -668,4 +669,4 @@ async function handleTiktokPhotoDownload(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-}
+          }
