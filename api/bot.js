@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+menu default async function handler(req, res) {
   const TOKEN = "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // token bot
   const API = `https://api.telegram.org/bot${TOKEN}`;
 
@@ -14,8 +14,8 @@ export default async function handler(req, res) {
         const keyboard = {
           inline_keyboard: [
             [
-              { text: "📖 Menu", callback_data: "menu" },
-              { text: "ℹ️ About", callback_data: "about" }
+              { text: "📖 Menu", callback_data: "/menu" },
+              { text: "ℹ️ About", callback_data: "/about" }
             ],
             [{ text: "🌐 Website", url: "https://vinzz.com" }]
           ]
