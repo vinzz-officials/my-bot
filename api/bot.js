@@ -159,7 +159,7 @@ export default async function handler(req, res) {
       ],
       [
         { text: "👤 Owner", callback_data: "owksnwikwns" },
-            [{ text: "🌐 Website", url: "https://free-panels-pterodactyl.netlify.app" }]
+            { text: "🌐 Website", url: "https://free-panels-pterodactyl.netlify.app" }
       ],
     ]);
   }
