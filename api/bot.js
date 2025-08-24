@@ -410,7 +410,7 @@ async function handleTiktokPhotoDownload(chat_id, url) {
       }
 
       // Buat caption 
-      const caption = `📸 <b>${escapeHTML(json.data.metadata.tittle || "-")}
+      const caption = `📸 <b>${escapeHTML(json.data.metadata.title || "-")}
 </b>\n👤 Creator: ${escapeHTML(json.data.metadata.creator || "-")}`;
 
       // Kirim semua foto sekaligus sebagai media_group
