@@ -160,43 +160,7 @@ if (
   }
 
   // ========= HELPERS =========
-  async function handleApkSearch(chat_id, query) {
-  try {
-    await sendHTML(chat_id, `🔎 Mencari: <code>${escapeHTML(query)}</code> ...`);
-
-    const r = await fetch(
-      `https://api.siputzx.my.id/api/apk/an1?search=${encodeURIComponent(query)}`
-    );
-    const j = await r.json();
-
-    if (!j || !j.result || j.result.length === 0) {
-      await sendHTML(chat_id, `❌ Tidak ada hasil untuk: <code>${escapeHTML(query)}</code>`);
-      return;
-    }
-
-    // ambil maksimal 5 hasil pertama biar gak spam
-    const results = j.result.slice(0, 5);
-
-    for (const item of results) {
-      const caption =
-        `📱 <b>${escapeHTML(item.title || "-")}</b>\n` +
-        (item.category ? `Kategori: ${escapeHTML(item.category)}\n` : "") +
-        (item.version ? `Versi: ${escapeHTML(item.version)}\n` : "") +
-        (item.size ? `Size: ${escapeHTML(item.size)}\n` : "") +
-        (item.link ? `🔗 <a href="${item.link}">Download</a>\n` : "");
-
-      if (item.thumbnail) {
-        await sendPhoto(chat_id, item.thumbnail, caption);
-      } else {
-        await sendHTML(chat_id, caption);
-      }
-    }
-  } catch (err) {
-    console.error("APK Search error:", err);
-    await sendHTML(chat_id, "⚠️ Gagal mencari aplikasi. Coba lagi nanti.");
-  }
-}
-
+  
   function startKeyboard() {
     return mkInline([
       [
@@ -225,6 +189,44 @@ if (
   function backKeyboard() {
     return mkInline([[{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }]]);
   }
+
+async function handleApkSearch(chat_id, query) {
+  try {
+    await sendHTML(chat_id, `🔎 Mencari: <code>${escapeHTML(query)}</code> ...`);
+
+    const result2 = await fetch(
+      `https://api.siputzx.my.id/api/apk/an1?search=${encodeURIComponent(query)}`
+    );
+    const json = await result2.json();
+
+    if (!json || !json.data || json.data.length === 0) {
+      await sendHTML(chat_id, `❌ Tidak ada hasil untuk: <code>${escapeHTML(query)}</code>`);
+      return;
+    }
+
+    // ambil maksimal 5 hasil pertama biar gak spam
+    const results = json.data.slice(0, 5);
+
+    for (const item of results) {
+      const caption =
+        `📱 <b>${escapeHTML(item.title || "-")}</b>\n` +
+        (item.developer ? `👨‍💻 Dev: ${escapeHTML(item.developer)}\n` : "") +
+        (item.type ? `📂 Tipe: ${escapeHTML(item.type)}\n` : "") +
+        (item.rating?.value ? `⭐ Rating: ${item.rating.value} (${item.rating.percentage}%)\n` : "") +
+        (item.link ? `🔗 <a href="${item.link}">Download</a>\n` : "");
+
+      if (item.image) {
+        await sendPhoto(chat_id, item.image, caption);
+      } else {
+        await sendHTML(chat_id, caption);
+      }
+    }
+  } catch (err) {
+    console.error("APK Search error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal mencari aplikasi. Coba lagi nanti.");
+  }
+}
+
 
   async function requestIpInput(chat_id) {
     const payload = {
@@ -403,4 +405,4 @@ if (
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-    }
+          }
