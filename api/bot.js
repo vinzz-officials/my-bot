@@ -354,12 +354,12 @@ async function handleTiktokDownload(chat_id, url) {
       if (type === "video") {
         // kalau video
         const videoUrl = urls?.[0];
-        await tg("sendVideo", {
-          chat_id,
-          video: videoUrl,
-          caption: `🎥 <b>${escapeHTML(metadata?.title || "Video TikTok")}</b>\n👤 Creator: ${escapeHTML(metadata?.creator || "-")}`,
-          parse_mode: "HTML",
-        });
+        await tg("sendDocument", {
+  chat_id,
+  document: videoUrl,
+  caption: `🎥 <b>${escapeHTML(metadata?.title || "Video TikTok")}</b>\n👤 Creator: ${escapeHTML(metadata?.creator || "-")}`,
+  parse_mode: "HTML",
+});
       } else if (type === "slideshow") {
         // kalau slideshow (foto banyak)
         if (urls?.length) {
@@ -635,4 +635,4 @@ async function handleTiktokDownload(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-    }
+        }
