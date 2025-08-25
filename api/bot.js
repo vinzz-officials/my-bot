@@ -338,8 +338,8 @@ async function handleTiktokStalk(chat_id, username) {
         `🎵 <b>TikTok Profile</b>\n\n` +
         `👤 <b>${escapeHTML(u.nickname || "-")}</b>\n` +
         `🔗 @${escapeHTML(u.uniqueId)}\n` +
-        (u.signature ? `📝 Bio: ${escapeHTML(u.signature)}\n` : "") +
-        (u.verified ? `✔️ Verified\n` : "") +
+        (u.signature ? `📝 Bio: ${escapeHTML(u.signature)}\n` : `📝 Bio: <b>User Tidak Memakai Bio</b>`) +
+        (u.verified ? `✔️ Verified: ✅\n` : "✔️ Verified: ❌") +
         (stats
           ? `\n👥 Followers: ${stats.followerCount}\n` +
             `👤 Following: ${stats.followingCount}\n` +
@@ -821,4 +821,4 @@ async function handleRobloxStalk(chat_id, username) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-}
+            }
