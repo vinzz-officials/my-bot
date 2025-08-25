@@ -54,6 +54,11 @@ if (update.message.reply_to_message) {
   const repliedText = update.message.reply_to_message.text || "";
   const url = text.trim();
 
+  if (/YouTube MP3 Downloader/.test(repliedText)) {
+    await handleYtMp3Download(chat_id, url)
+    return ok(res);
+  }
+
   if (/TikTok Video Download/.test(repliedText)) {
     await handleTiktokVideoDownload(chat_id, url);
     return ok(res);
@@ -102,13 +107,7 @@ if (update.message.reply_to_message) {
         return ok(res);
       }
 
-    if (/YouTube MP3 Downloader/.test(repliedText)) {
-  const url = text.trim();
-  await handleYtMp3Download(chat_id, url);
-  return ok(res);
-}
-
-   returnait (
+if (
   update.message.reply_to_message &&
   /TikTok Search/.test(update.message.reply_to_message.text || "")
 ) {
@@ -961,4 +960,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-              }
+        }
