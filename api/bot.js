@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   // === CONFIG ===
-  const TOKEN = process.env.TG_TOKEN || "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // disarankan: gunakan env var TG_TOKEN
+  const TOKEN = process.env.TG_TOKEN || "8396430373:AAE4BhMcJ0xl5V71sM55Dl2RQLIuNDBDTpQ"; // disarankan: gunakan env var TG_TOKEN
   const OWNER_NAME = "Vinzz Official";
   const OWNER_CONTACT = "@vinzz_official_store";
   const WHATSAPP_CONTACT = "wa.me/62815247824152";
