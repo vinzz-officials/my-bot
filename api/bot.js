@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   // === CONFIG ===
-  const TOKEN = process.env.TG_TOKEN || "8396430373:AAE4BhMcJ0xl5V71sM55Dl2RQLIuNDBDTpQ"; // disarankan: gunakan env var TG_TOKEN
+  const TOKEN = process.env.TG_TOKEN || "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // disarankan: gunakan env var TG_TOKEN
   const OWNER_NAME = "Vinzz Official";
   const OWNER_CONTACT = "@vinzz_official_store";
   const WHATSAPP_CONTACT = "wa.me/62815247824152";
@@ -65,6 +65,7 @@ if (update.message.reply_to_message) {
   }
 }
 
+
       if (
         update.message.reply_to_message &&
         /Masukkan username TikTok/.test(update.message.reply_to_message.text || "")
@@ -100,6 +101,25 @@ if (update.message.reply_to_message) {
         await handlePinterestSearch(chat_id, query);
         return ok(res);
       }
+
+if (/YouTube MP3 Downloader/.test(repliedText)) {
+  const url = text.trim();
+  await handleYtMp3Download(chat_id, url);
+  return ok(res);
+}
+
+if (
+  update.message.reply_to_message &&
+  /TikTok Search/.test(update.message.reply_to_message.text || "")
+) {
+  const keyword = text.trim();
+  if (keyword) {
+    await handleTiktokSearch(chat_id, keyword);
+  } else {
+    await sendHTML(chat_id, "⚠️ Kata kunci kosong, coba lagi.");
+  }
+  return ok(res);
+}
 
       if (
         update.message.reply_to_message &&
@@ -173,7 +193,7 @@ if (update.message.reply_to_message) {
           `🧩 <b>Fitur</b>\n\n` +
             `• IP Tracker (IP/Domain → lokasi, ASN, ISP, koordinat)\n` +
             `• APK Search\n` +
-            `• Pinterest search\n` + `• Tiktok stalk\n` + `• Tiktok Download Video\n` + `• Tiktok Download Foto\n` + `• Roblox Stalk\n` + `• IG Stalk`,
+            `• Pinterest search\n` + `• Tiktok stalk\n` + `• Tiktok Download Video\n` + `• Tiktok Download Foto\n` + `• Roblox Stalk\n` + `• IG Stalk\n` + `• TikTok Search\n` + `• Youtube MP3 Downloader`,
           featuresKeyboard()
         );
         return ok(res);
@@ -183,6 +203,16 @@ if (data === "robiwjwjkwmsj") {
   await tg("sendMessage", {
     chat_id,
     text: "🎮 <b>Roblox Stalk</b>\nMasukkan username Roblox:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
+
+if (data === "ytaknskandj") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "🎶 <b>YouTube MP3 Downloader</b>\nKirim link YouTube di bawah ini:",
     parse_mode: "HTML",
     reply_markup: JSON.stringify({ force_reply: true, selective: true }),
   });
@@ -251,6 +281,23 @@ if (data === "tikfotnaikaniwn") {
         });
         return ok(res);
       }
+      
+if (data === "ttsjakwnsi") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "🔎 <b>TikTok Search</b>\nKetik kata kunci video yang ingin dicari:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
+
+if (data.startsWith("ttsnkanaokejs:")) {
+  const [_, keyword, indexStr] = data.split(":");
+  const index = parseInt(indexStr, 10) || 0;
+  await handleTiktokSearch(chat_id, keyword, index);
+  return ok(res);
+}
 
       if (data === "ipksnwikwns") {
         // minta user balas dengan IP/domain via Force Reply
@@ -304,9 +351,14 @@ if (data === "tikfotnaikaniwn") {
       { text: "📸 TikTok Foto", callback_data: "tikfotnaikaniwn" }
     ],
     [
-  { text: "🎮 Roblox Stalk", callback_data: "robiwjwjkwmsj" },
-    { text: "🔎 Instagram Stalk", callback_data: "igkwnakke" }
-],
+      { text: "🔎 TikTok Search", callback_data: "ttsjakwnsi" },
+      { text: "🎮 Roblox Stalk", callback_data: "robiwjwjkwmsj" }
+    ],
+    [
+      { text: "👀 Instagram Stalk", callback_data: "igkwnakke" },
+      
+  { text: "⬇️ YouTube MP3", callback_data: "ytaknskandj" }
+    ],
     [{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }]
   ]);
 }
@@ -361,7 +413,7 @@ async function handleTiktokStalk(chat_id, username) {
   
   async function handleIGStalk(chat_id, username) {
     try {
-      await sendHTML(chat_id, `🔎 Mencari info Instagram: <code>${escapeHTML(username)}</code> ...`);
+      await sendHTML(chat_id, `👀 Mencari info Instagram: <code>${escapeHTML(username)}</code> ...`);
 
       const res = await fetch(
         `https://api.siputzx.my.id/api/stalk/instagram?username=${encodeURIComponent(username)}`
@@ -381,7 +433,7 @@ async function handleTiktokStalk(chat_id, username) {
   ? `📝 Bio: ${escapeHTML(u.biography)}\n`
   : `📝 Bio: Tidak ada`;
       const caption =
-        `🔎 <b>Instagram Profile</b>\n\n` +
+        `👀 <b>Instagram Profile</b>\n\n` +
         `👤 <b>${escapeHTML(u.full_name || "-")}</b>\n` +
         `🔗 @${escapeHTML(u.username)}\n` +
         bio  +
@@ -401,7 +453,53 @@ async function handleTiktokStalk(chat_id, username) {
       await sendHTML(chat_id, "⚠️ Gagal mengambil data IG. Coba lagi nanti.");
     }
   }
-  
+ 
+  async function handleTiktokSearch(chat_id, keyword, index = 0) {
+  try {
+    if (index === 0) {
+      await sendHTML(chat_id, `🔎 Mencari di TikTok: <code>${escapeHTML(keyword)}</code> ...`);
+    }
+
+    const res = await fetch(
+      `https://api.siputzx.my.id/api/s/tiktok?query=${encodeURIComponent(keyword)}`
+    );
+    const json = await res.json();
+
+    if (!json?.status || !Array.isArray(json.data) || json.data.length === 0) {
+      await sendHTML(chat_id, `❌ Tidak ada hasil untuk: <code>${escapeHTML(keyword)}</code>`);
+      return;
+    }
+
+    if (index >= json.data.length) {
+      await sendHTML(chat_id, `✅ Udah gak ada hasil lagi untuk: <code>${escapeHTML(keyword)}</code>`);
+      return;
+    }
+
+    const v = json.data[index];
+    const videoUrl = v.play || v.wmplay;
+    const title = v.title || "(tanpa judul)";
+    const creatorName = v?.author?.nickname || "-";
+    const creatorId = v?.author?.unique_id ? `@${v.author.unique_id}` : "-";
+
+    const caption = `🎬 <b>${escapeHTML(title)}</b>\n\n👤 Creator: ${escapeHTML(creatorName)} (${escapeHTML(creatorId)})\n📌 Hasil ke <b>${index + 1}</b> dari <b>${json.data.length}</b>`;
+
+    await tg("sendVideo", {
+      chat_id,
+      video: videoUrl,
+      caption,
+      parse_mode: "HTML",
+      reply_markup: JSON.stringify({
+        inline_keyboard: [[
+          { text: "Cari lagi 🔎", callback_data: `ttsnkanaokejs:${keyword}:${index + 1}` }
+        ]]
+      }),
+    });
+  } catch (err) {
+    console.error("TikTok Search error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal mencari di TikTok. Coba lagi nanti.");
+  }
+}
+ 
 async function handleApkSearch(chat_id, query) {
   try {
     await sendHTML(chat_id, `🔎 Mencari: <code>${escapeHTML(query)}</code> ...`);
@@ -636,6 +734,47 @@ async function handleRobloxStalk(chat_id, username) {
     await sendHTML(chat_id, "⚠️ Gagal mengambil data Roblox. Coba lagi nanti.");
   }
 }
+
+async function handleYtMp3Download(chat_id, url) {
+  try {
+    await sendHTML(chat_id, "⏳ Sedang memproses YouTube MP3...");
+
+    const res = await fetch(
+      `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`
+    );
+    const json = await res.json();
+
+    if (!json?.result?.status) {
+      await sendHTML(chat_id, "❌ Gagal mengambil data YouTube. Pastikan link valid.");
+      return;
+    }
+
+    const { metadata, download } = json.result;
+    if (!download?.url) {
+      await sendHTML(chat_id, "⚠️ Tidak ada file audio ditemukan.");
+      return;
+    }
+
+    const caption =
+      `🎶 <b>${escapeHTML(metadata.title || "Audio YouTube")}</b>\n` +
+      `👤 Channel: ${escapeHTML(metadata.author?.name || "-")}\n` +
+      `🕒 Durasi: ${escapeHTML(metadata.duration?.timestamp || "-")}\n` +
+      `👀 Views: ${metadata.views || 0}\n` +
+      `📂 Quality: ${download.quality}`;
+
+    await tg("sendAudio", {
+      chat_id,
+      audio: download.url,
+      caption,
+      parse_mode: "HTML",
+      title: metadata.title,
+      performer: metadata.author?.name || "Unknown",
+    });
+  } catch (err) {
+    console.error("YouTube MP3 error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal mendownload audio. Coba lagi nanti.");
+  }
+}
   
   async function requestIpInput(chat_id) {
     const payload = {
@@ -822,4 +961,4 @@ async function handleRobloxStalk(chat_id, username) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-          }
+              }
