@@ -102,13 +102,13 @@ if (update.message.reply_to_message) {
         return ok(res);
       }
 
-if (/YouTube MP3 Downloader/.test(repliedText)) {
+    if (/YouTube MP3 Downloader/.test(repliedText)) {
   const url = text.trim();
   await handleYtMp3Download(chat_id, url);
   return ok(res);
 }
 
-if (
+   returnait (
   update.message.reply_to_message &&
   /TikTok Search/.test(update.message.reply_to_message.text || "")
 ) {
