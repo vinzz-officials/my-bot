@@ -1,8 +1,9 @@
 export default async function handler(req, res) {
   // === CONFIG ===
-  const TOKEN = process.env.TG_TOKEN || "8396430373:AAE4BhMcJ0xl5V71sM55Dl2RQLIuNDBDTpQ"; // disarankan: gunakan env var TG_TOKEN
+  const TOKEN = process.env.TG_TOKEN || "8396430373:AAGZ9lbLgPhAhIZUghflXgYls1taRpmPudY"; // disarankan: gunakan env var TG_TOKEN
   const OWNER_NAME = "Vinzz Official";
   const OWNER_CONTACT = "@vinzz_official_store";
+  const IdOwner = "7777604508";
   const WHATSAPP_CONTACT = "wa.me/62815247824152";
 
   const API = `https://api.telegram.org/bot${TOKEN}`;
@@ -281,6 +282,58 @@ if (data === "tikfotnaikaniwn") {
         return ok(res);
       }
       
+      if (data === "ratjwjnsjsjs") {
+        await editOrSend(
+          chat_id,
+          message_id,
+          `🌟 <b>Rate Bot</b>\n\nSilakan pilih rating kamu (1-5):`,
+          JSON.stringify({
+            inline_keyboard: [
+              [
+                { text: "⭐ 1", callback_data: "rate:1" },
+                { text: "⭐⭐ 2", callback_data: "rate:2" },
+                { text: "⭐⭐⭐ 3", callback_data: "rate:3" },
+              ],
+              [
+                { text: "⭐⭐⭐⭐ 4", callback_data: "rate:4" },
+                { text: "⭐⭐⭐⭐⭐ 5", callback_data: "rate:5" },
+              ],
+              [{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }],
+            ],
+          })
+        );
+        return ok(res);
+      }
+
+      if (data.startsWith("rate:")) {
+        const rating = data.split(":")[1];
+        const stars = "⭐".repeat(rating);
+
+        // --- Balas ke user ---
+        await editOrSend(
+          chat_id,
+          message_id,
+          `✅ Terima kasih! Rating anda: ${stars}`,
+          backKeyboard()
+        );
+
+        // --- Kirim notif ke Owner ---
+        const username = from.username ? `@${from.username}` : from.first_name;
+        const OWNER_ID = IdOwner
+
+        await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: OWNER_ID,
+            text: `📩 <b>Rating Baru!</b>\n\n👤 User: ${username} (ID: <code>${from.id}</code>)\n⭐ Rating: ${stars}`,
+            parse_mode: "HTML",
+          }),
+        });
+
+        return ok(res);
+      }
+      
 if (data === "ttsjakwnsi") {
   await tg("sendMessage", {
     chat_id,
@@ -332,6 +385,9 @@ if (data.startsWith("ttsnkanaokejs:")) {
         { text: "👤 Owner", callback_data: "owksnwikwns" },
         { text: "🪀 Whatsapp", url: "https://wa.me/62815247824152" },
       ],
+      [
+       { text: "🌟 Rate", callback_data: "ratjwjnsjsjs" },
+       ],
     ]);
   }
 
@@ -960,4 +1016,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-        }
+                             }
