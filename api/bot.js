@@ -306,33 +306,34 @@ if (data === "tikfotnaikaniwn") {
       }
 
       if (data.startsWith("rate:")) {
-        const rating = data.split(":")[1];
-        const stars = "⭐".repeat(rating);
+  const rating = data.split(":")[1];
+  const stars = "⭐".repeat(rating);
 
-        // --- Balas ke user ---
-        await editOrSend(
-          chat_id,
-          message_id,
-          `✅ Terima kasih! Rating anda: ${stars}`,
-          backKeyboard()
-        );
+  // --- Balas ke user ---
+  await editOrSend(
+    chat_id,
+    message_id,
+    `✅ Terima kasih! Rating anda: ${stars}`,
+    backKeyboard()
+  );
 
-        // --- Kirim notif ke Owner ---
-        const username = from.username ? `@${from.username}` : from.first_name;
-        const OWNER_ID = IdOwner
+  // --- Kirim notif ke Owner ---
+  const user = cq.from; // ambil data user dari callback_query
+  const username = user.username ? `@${user.username}` : user.first_name;
+  const OWNER_ID = IdOwner;
 
-        await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: OWNER_ID,
-            text: `📩 <b>Rating Baru!</b>\n\n👤 User: ${username} (ID: <code>${from.id}</code>)\n⭐ Rating: ${stars}`,
-            parse_mode: "HTML",
-          }),
-        });
+  await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: OWNER_ID,
+      text: `📩 <b>Rating Baru!</b>\n\n👤 User: ${username} (ID: <code>${user.id}</code>)\n⭐ Rating: ${stars}`,
+      parse_mode: "HTML",
+    }),
+  });
 
-        return ok(res);
-      }
+  return ok(res);
+}
       
 if (data === "ttsjakwnsi") {
   await tg("sendMessage", {
@@ -1016,4 +1017,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-                             }
+      }
