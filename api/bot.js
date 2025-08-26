@@ -492,8 +492,11 @@ function featuresKeyboard1() {
 }
 
 function fitur_page_info() {
-    return mkInline([[{ text: "Page 1", callback_data: "feaksnwikwns()" },
-    { text: "Page 2", callback_data: "fitur_page2" }]]);
+    return mkInline([[{ text: "Page 1", callback_data: "feaksnwikwns" },
+    { text: "Page 2", callback_data: "fitur_page2" }],
+    [
+      { text: "⬅️ Kembali", callback_data: "menksnwikwns" }
+    ]]);
   }
   
 
@@ -1128,4 +1131,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-          }
+        }
