@@ -261,7 +261,8 @@ if (data === "fitur_page2") {
 await editOrSend(
           chat_id,
           message_id,
-          `➡️`,
+          `🧩 <b>Fitur</b>\n\n` +
+            `• Cek Host`,
           featuresKeyboard1()
         );
         return ok(res);
@@ -271,7 +272,10 @@ await editOrSend(
 await editOrSend(
           chat_id,
           message_id,
-          `⬅️`,
+          `🧩 <b>Fitur</b>\n\n` +
+            `• IP Tracker (IP/Domain → lokasi, ASN, ISP, koordinat)\n` +
+            `• APK Search\n` +
+            `• Pinterest search\n` + `• Tiktok stalk\n` + `• Tiktok Download Video\n` + `• Tiktok Download Foto\n` + `• Roblox Stalk\n` + `• IG Stalk\n` + `• TikTok Search\n` + `• Youtube MP3 Downloader`,
           featuresKeyboard()
         );
         return ok(res);
@@ -488,8 +492,8 @@ function featuresKeyboard1() {
 }
 
 function fitur_page_info() {
-    return mkInline([[{ text: "Page 1", callback_data: "featuresKeyboard" },
-    { text: "Page 2", callback_data: "featuresKeyboard1" }]]);
+    return mkInline([[{ text: "Page 1", callback_data: "feaksnwikwns()" },
+    { text: "Page 2", callback_data: "fitur_page2" }]]);
   }
   
 
@@ -1124,4 +1128,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-}
+          }
