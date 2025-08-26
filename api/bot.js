@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   // === CONFIG ===
-  const TOKEN = process.env.TG_TOKEN || "8396430373:AAE4BhMcJ0xl5V71sM55Dl2RQLIuNDBDTpQ"; // disarankan: gunakan env var TG_TOKEN
+  const TOKEN = process.env.TG_TOKEN || "8396430373:AAE4BhMcJ0xl5V71sM55Dl2RQLIuNDBDTpQ";
   const OWNER_NAME = "Vinzz Official";
   const OWNER_CONTACT = "@vinzz_official_store";
   const IdOwner = "7777604508";
@@ -64,6 +64,12 @@ if (update.message.reply_to_message) {
     await handleTiktokVideoDownload(chat_id, url);
     return ok(res);
   }
+
+if (update.message.reply_to_message && /Cek Host/.test(update.message.reply_to_message.text || "")) {
+  const targetUrl = text.trim();
+  await handleCekHost(chat_id, targetUrl);
+  return ok(res);
+}
 
   if (/TikTok Photo Download/.test(repliedText)) {
     await handleTiktokPhotoDownload(chat_id, url);
@@ -241,6 +247,47 @@ if (data === "ytaknskandj") {
         return ok(res);
       }
       
+      if (data === "cekhost_page2") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "🌐 <b>Cek Host</b>\nMasukkan URL atau domain untuk dicek:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
+      
+if (data === "fitur_page2") {
+await editOrSend(
+          chat_id,
+          message_id,
+          `➡️`,
+          featuresKeyboard1()
+        );
+        return ok(res);
+      }
+      
+      if (data === "fitur_page1") {
+await editOrSend(
+          chat_id,
+          message_id,
+          `⬅️`,
+          featuresKeyboard()
+        );
+        return ok(res);
+      }
+      
+      if (data === "fitur_page_info") {
+await editOrSend(
+          chat_id,
+          message_id,
+          `<b>Silahkan Pilih Page</b>`,
+          fitur_page_info()
+          
+        );
+        return ok(res);
+      }
+      
 if (data === "tikvidnaikaniwn") {
   await tg("sendMessage", {
     chat_id,
@@ -415,9 +462,36 @@ if (data.startsWith("ttsnkanaokejs:")) {
       
   { text: "⬇️ YouTube MP3", callback_data: "ytaknskandj" }
     ],
+          [
+      { text: "⬅️", callback_data: "fitur_page1" },
+      { text: "1/2", callback_data: "fitur_page_info" },
+            { text: "➡️", callback_data: "fitur_page2" }
+    ],
     [{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }]
   ]);
 }
+
+function featuresKeyboard1() {
+  return mkInline([
+    [
+      { text: "🖥 Cek Host", callback_data: "cekhost_page2" }
+    ],
+        [
+      { text: "⬅️", callback_data: "fitur_page1" },
+      { text: "2/2", callback_data: "fitur_page_info" },
+            { text: "➡️", callback_data: "fitur_page2" }
+    ],
+    [
+      { text: "⬅️ Kembali", callback_data: "menksnwikwns" }
+    ]
+  ]);
+}
+
+function fitur_page_info() {
+    return mkInline([[{ text: "Page 1", callback_data: "featuresKeyboard" },
+    { text: "Page 2", callback_data: "featuresKeyboard1" }]]);
+  }
+  
 
   function backKeyboard() {
     return mkInline([[{ text: "⬅️ Kembali", callback_data: "menksnwikwns" }]]);
@@ -791,6 +865,39 @@ async function handleRobloxStalk(chat_id, username) {
   }
 }
 
+async function handleCekHost(chat_id, targetUrl) {
+  try {
+    await sendHTML(chat_id, `🌐 Mengecek host untuk: <code>${escapeHTML(targetUrl)}</code> ...`);
+
+    const res = await fetch(`https://api.vreden.my.id/api/tools/cekhost?url=${encodeURIComponent(targetUrl)}`);
+    const json = await res.json();
+
+    if (!json || json.status !== 200 || !json.result?.checks) {
+      await sendHTML(chat_id, `❌ Gagal memeriksa host untuk <code>${escapeHTML(targetUrl)}</code>`);
+      return;
+    }
+
+    const checks = json.result.checks;
+    let msg = `🛰 <b>Hasil Cek Host</b>\nURL: <code>${escapeHTML(targetUrl)}</code>\n\n`;
+
+    for (const check of checks) {
+      const server = check.server || {};
+      const http = check.http_check || {};
+      msg += `🌍 Server: ${server.host || "-"} (${server.city || "-"}, ${server.country || "-"})\n`;
+      msg += `IP Server: ${server.ip || "-"}\n`;
+      msg += `Status HTTP: ${http.status_code || "-"} (${http.result || "-"})\n`;
+      msg += `Ping: ${http.ping || "-"}s\n`;
+      msg += `IP Website: ${http.ip_web || "-"}\n\n`;
+    }
+
+    await sendHTML(chat_id, msg);
+
+  } catch (err) {
+    console.error("Cek Host error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal mengecek host. Coba lagi nanti.");
+  }
+}
+
 async function handleYtMp3Download(chat_id, url) {
   try {
     await sendHTML(chat_id, "⏳ Sedang memproses YouTube MP3...");
@@ -1017,4 +1124,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-      }
+}
