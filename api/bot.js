@@ -59,6 +59,12 @@ if (update.message.reply_to_message) {
     await handleYtMp3Download(chat_id, url)
     return ok(res);
   }
+  
+  if (/iPhone Quote/.test(repliedText)) {
+  const quoteText = text.trim();
+  await handleIqc(chat_id, quoteText);
+  return ok(res);
+}
 
   if (/TikTok Video Download/.test(repliedText)) {
     await handleTiktokVideoDownload(chat_id, url);
@@ -123,6 +129,32 @@ if (
     await handleTiktokSearch(chat_id, keyword);
   } else {
     await sendHTML(chat_id, "⚠️ Kata kunci kosong, coba lagi.");
+  }
+  return ok(res);
+}
+
+if (
+  update.message.reply_to_message &&
+  /Masukan Text/.test(update.message.reply_to_message.text || "")
+) {
+  const text = text.trim();
+  if (text) {
+    await handleText2Base64(chat_id, text);
+  } else {
+    await sendHTML(chat_id, "⚠️ Text kosong, coba lagi.");
+  }
+  return ok(res);
+}
+
+if (
+  update.message.reply_to_message &&
+  /Masukan Code Base64/.test(update.message.reply_to_message.text || "")
+) {
+  const text = text.trim();
+  if (text) {
+    await handleBase642Text(chat_id, text);
+  } else {
+    await sendHTML(chat_id, "⚠️ Code kosong, coba lagi.");
   }
   return ok(res);
 }
@@ -215,6 +247,26 @@ if (data === "robiwjwjkwmsj") {
   return ok(res);
 }
 
+if (data === "text2base64_page2") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "🔧 <b>Text to Base64</b>\nMasukkan Text:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
+
+if (data === "base642text_page2") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "🔧 <b>Base64 to Text</b>\nMasukkan Code Base64:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
+
 if (data === "ytaknskandj") {
   await tg("sendMessage", {
     chat_id,
@@ -262,7 +314,7 @@ await editOrSend(
           chat_id,
           message_id,
           `🧩 <b>Fitur</b>\n\n` +
-            `• Cek Host`,
+            `• Cek Host\n` + `• Text to Base64\n` + `• Base64 to Text`,
           featuresKeyboard1()
         );
         return ok(res);
@@ -306,6 +358,16 @@ if (data === "tikfotnaikaniwn") {
   await tg("sendMessage", {
     chat_id,
     text: "📸 <b>TikTok Photo Download</b>\nKirim link TikTok foto di bawah ini:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
+
+if (data === "iqc_feature_page2") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "📱 <b>iPhone Quote</b>\nMasukkan text pesan:",
     parse_mode: "HTML",
     reply_markup: JSON.stringify({ force_reply: true, selective: true }),
   });
@@ -478,7 +540,10 @@ if (data.startsWith("ttsnkanaokejs:")) {
 function featuresKeyboard1() {
   return mkInline([
     [
-      { text: "🖥 Cek Host", callback_data: "cekhost_page2" }
+      { text: "🖥 Cek Host", callback_data: "cekhost_page2" },
+      { text: "🔧 Text to Base64", callback_data: "text2base64_page2" },
+      { text: "🔧 Base64 to Text", callback_data: "base642text_page2" },
+  { text: "📱 iPhone Quote", callback_data: "iqc_feature_page2" }
     ],
         [
       { text: "⬅️", callback_data: "fitur_page1" },
@@ -506,6 +571,54 @@ function fitur_page_info() {
 
   // ====== FEATURE HANDLERS ======
 
+async function handleText2Base64(chat_id, text) {
+  try {
+    await sendHTML(chat_id, `🔎 Memproses Text: <code>${escapeHTML(text)}</code> ...`);
+
+    const res = await fetch(
+      `https://api.siputzx.my.id/api/tools/text2base64?text=${encodeURIComponent(text)}`
+    );
+    const json = await res.json();
+
+    if (!json || !json.status || !json.data?.base64) {
+      await sendHTML(chat_id, `❌ Tidak ada hasil untuk text <code>${escapeHTML(text)}</code>`);
+      return;
+    }
+
+    const r = json.data;
+    const caption = `✅ Hasil: <code>${r.base64}</code>`;
+
+    await sendHTML(chat_id, caption);
+  } catch (err) {
+    console.error("Text to Base64 error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal mengenkripsi data ke Base64. Coba lagi nanti.");
+  }
+}
+
+async function handleBase642Text(chat_id, text) {
+  try {
+    await sendHTML(chat_id, `🔎 Memproses Data: <code>${escapeHTML(text)}</code> ...`);
+
+    const res = await fetch(
+      `https://api.siputzx.my.id/api/tools/base642text?base64=${encodeURIComponent(text)}`
+    );
+    const json = await res.json();
+
+    if (!json || !json.status || !json.data?.text) {
+      await sendHTML(chat_id, `❌ Tidak ada hasil untuk data <code>${escapeHTML(text)}</code>`);
+      return;
+    }
+
+    const r = json.data;
+    const caption = `✅ Hasil: <code>${r.text}</code>`;
+
+    await sendHTML(chat_id, caption);
+  } catch (err) {
+    console.error("Base64 to text error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal mendekripsi Base64 ke text. Coba lagi nanti.");
+  }
+}
+  
 async function handleTiktokStalk(chat_id, username) {
     try {
       await sendHTML(chat_id, `🔎 Mencari info TikTok: <code>${escapeHTML(username)}</code> ...`);
@@ -704,6 +817,29 @@ async function handleTiktokVideoDownload(chat_id, url) {
   } catch (err) {
     console.error("TikTok Video Download error:", err);
     await sendHTML(chat_id, "⚠️ Gagal mendownload video. Coba lagi nanti.");
+  }
+}
+
+async function handleIqc(chat_id, text) {
+  try {
+    const time = new Intl.DateTimeFormat("id-ID", {
+      timeZone: "Asia/Makassar",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(new Date());
+
+    // bikin url api
+    const url = `https://brat.siputzx.my.id/iphone-quoted?time=${encodeURIComponent(
+      time
+    )}&batteryPercentage=${Math.floor(Math.random() * 100) + 1}&carrierName=TELKOMSEL&messageText=${encodeURIComponent(
+      text
+    )}&emojiStyle=apple`;
+
+    await sendPhoto(chat_id, url, `📱 iPhone Quote\n\n💬 ${escapeHTML(text)}`);
+  } catch (err) {
+    console.error("iPhone Quote error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal membuat iPhone Quote. Coba lagi nanti.");
   }
 }
 
