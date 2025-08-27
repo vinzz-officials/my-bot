@@ -135,7 +135,7 @@ if (
 
 if (
   update.message.reply_to_message &&
-  /Masukan Text/i.test(update.message.reply_to_message.text || "")
+  /Masukkan Text/i.test(update.message.reply_to_message.text || "")
 ) {
   const code = text.trim();
   if (code) {
@@ -148,7 +148,7 @@ if (
 
 if (
   update.message.reply_to_message &&
-  /Masukan Code Base64/i.test(update.message.reply_to_message.text || "")
+  /Masukkan Code Base64/i.test(update.message.reply_to_message.text || "")
 ) {
   const code = text.trim();
   if (code) {
@@ -1257,4 +1257,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-}
+          }
