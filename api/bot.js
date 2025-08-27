@@ -314,7 +314,7 @@ await editOrSend(
           chat_id,
           message_id,
           `🧩 <b>Fitur</b>\n\n` +
-            `• Cek Host\n` + `• Text to Base64\n` + `• Base64 to Text`,
+            `• Cek Host\n` + `• Text to Base64\n` + `• Base64 to Text\n` + `• IQC (Iphone quote caption)`,
           featuresKeyboard1()
         );
         return ok(res);
