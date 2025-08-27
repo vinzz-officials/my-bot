@@ -137,9 +137,9 @@ if (
   update.message.reply_to_message &&
   /Masukan Text/.test(update.message.reply_to_message.text || "")
 ) {
-  const text = text.trim();
-  if (text) {
-    await handleText2Base64(chat_id, text);
+  const code = text.trim();
+  if (code) {
+    await handleText2Base64(chat_id, code);
   } else {
     await sendHTML(chat_id, "⚠️ Text kosong, coba lagi.");
   }
@@ -150,9 +150,9 @@ if (
   update.message.reply_to_message &&
   /Masukan Code Base64/.test(update.message.reply_to_message.text || "")
 ) {
-  const text = text.trim();
-  if (text) {
-    await handleBase642Text(chat_id, text);
+  const code = text.trim();
+  if (code) {
+    await handleBase642Text(chat_id, code);
   } else {
     await sendHTML(chat_id, "⚠️ Code kosong, coba lagi.");
   }
@@ -572,17 +572,17 @@ function fitur_page_info() {
 
   // ====== FEATURE HANDLERS ======
 
-async function handleText2Base64(chat_id, text) {
+async function handleText2Base64(chat_id, code) {
   try {
-    await sendHTML(chat_id, `🔎 Memproses Text: <code>${escapeHTML(text)}</code> ...`);
+    await sendHTML(chat_id, `🔎 Memproses Text: <code>${escapeHTML(code)}</code> ...`);
 
     const res = await fetch(
-      `https://api.siputzx.my.id/api/tools/text2base64?text=${encodeURIComponent(text)}`
+      `https://api.siputzx.my.id/api/tools/text2base64?text=${encodeURIComponent(code)}`
     );
     const json = await res.json();
 
     if (!json || !json.status || !json.data?.base64) {
-      await sendHTML(chat_id, `❌ Tidak ada hasil untuk text <code>${escapeHTML(text)}</code>`);
+      await sendHTML(chat_id, `❌ Tidak ada hasil untuk text <code>${escapeHTML(code)}</code>`);
       return;
     }
 
@@ -596,17 +596,17 @@ async function handleText2Base64(chat_id, text) {
   }
 }
 
-async function handleBase642Text(chat_id, text) {
+async function handleBase642Text(chat_id, code) {
   try {
-    await sendHTML(chat_id, `🔎 Memproses Data: <code>${escapeHTML(text)}</code> ...`);
+    await sendHTML(chat_id, `🔎 Memproses Data: <code>${escapeHTML(code)}</code> ...`);
 
     const res = await fetch(
-      `https://api.siputzx.my.id/api/tools/base642text?base64=${encodeURIComponent(text)}`
+      `https://api.siputzx.my.id/api/tools/base642text?base64=${encodeURIComponent(code)}`
     );
     const json = await res.json();
 
     if (!json || !json.status || !json.data?.text) {
-      await sendHTML(chat_id, `❌ Tidak ada hasil untuk data <code>${escapeHTML(text)}</code>`);
+      await sendHTML(chat_id, `❌ Tidak ada hasil untuk data <code>${escapeHTML(code)}</code>`);
       return;
     }
 
@@ -1268,4 +1268,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-        }
+                                    }
