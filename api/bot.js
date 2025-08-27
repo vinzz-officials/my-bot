@@ -576,23 +576,12 @@ async function handleText2Base64(chat_id, code) {
   try {
     await sendHTML(chat_id, `🔎 Memproses Text: <code>${escapeHTML(code)}</code> ...`);
 
-    const res = await fetch(
-      `https://api.siputzx.my.id/api/tools/text2base64?text=${encodeURIComponent(code)}`
-    );
-    const json = await res.json();
+    const base64 = Buffer.from(code, "utf-8").toString("base64");
 
-    if (!json || !json.status || !json.data?.base64) {
-      await sendHTML(chat_id, `❌ Tidak ada hasil untuk text <code>${escapeHTML(code)}</code>`);
-      return;
-    }
-
-    const r = json.data;
-    const caption = `✅ Hasil: <code>${r.base64}</code>`;
-
-    await sendHTML(chat_id, caption);
+    await sendHTML(chat_id, `✅ Hasil Encode:\n<code>${base64}</code>`);
   } catch (err) {
     console.error("Text to Base64 error:", err);
-    await sendHTML(chat_id, "⚠️ Gagal mengenkripsi data ke Base64. Coba lagi nanti.");
+    await sendHTML(chat_id, "⚠️ Gagal encode ke Base64. Coba lagi nanti.");
   }
 }
 
@@ -600,23 +589,23 @@ async function handleBase642Text(chat_id, code) {
   try {
     await sendHTML(chat_id, `🔎 Memproses Data: <code>${escapeHTML(code)}</code> ...`);
 
-    const res = await fetch(
-      `https://api.siputzx.my.id/api/tools/base642text?base64=${encodeURIComponent(code)}`
-    );
-    const json = await res.json();
-
-    if (!json || !json.status || !json.data?.text) {
-      await sendHTML(chat_id, `❌ Tidak ada hasil untuk data <code>${escapeHTML(code)}</code>`);
+    let text;
+    try {
+      text = Buffer.from(code, "base64").toString("utf-8");
+    } catch {
+      await sendHTML(chat_id, `❌ Code Base64 tidak valid: <code>${escapeHTML(code)}</code>`);
       return;
     }
 
-    const r = json.data;
-    const caption = `✅ Hasil: <code>${r.text}</code>`;
+    if (!text) {
+      await sendHTML(chat_id, `❌ Code Base64 tidak valid: <code>${escapeHTML(code)}</code>`);
+      return;
+    }
 
-    await sendHTML(chat_id, caption);
+    await sendHTML(chat_id, `✅ Hasil Decode:\n<code>${escapeHTML(text)}</code>`);
   } catch (err) {
     console.error("Base64 to text error:", err);
-    await sendHTML(chat_id, "⚠️ Gagal mendekripsi Base64 ke text. Coba lagi nanti.");
+    await sendHTML(chat_id, "⚠️ Gagal decode Base64 ke text. Coba lagi nanti.");
   }
 }
   
@@ -1268,4 +1257,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-                                    }
+}
