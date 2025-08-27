@@ -20,7 +20,7 @@ export default async function handler(req, res) {
       const chat_id = update.message.chat.id;
       const text = (update.message.text || "").trim();
 
-      if (text === "/start") {
+      if (text === "/start" || text === "/start@Vinzz_officials_bot") {
         await sendHTML(
           chat_id,
           `<b>👋 Halo!</b>\n` +
