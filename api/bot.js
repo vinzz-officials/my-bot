@@ -541,7 +541,8 @@ function featuresKeyboard1() {
   return mkInline([
     [
       { text: "🖥 Cek Host", callback_data: "cekhost_page2" },
-      { text: "🔧 Text to Base64", callback_data: "text2base64_page2" },
+      { text: "🔧 Text to Base64", callback_data: "text2base64_page2" }],
+    [
       { text: "🔧 Base64 to Text", callback_data: "base642text_page2" },
   { text: "📱 iPhone Quote", callback_data: "iqc_feature_page2" }
     ],
