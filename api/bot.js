@@ -135,7 +135,7 @@ if (
 
 if (
   update.message.reply_to_message &&
-  /Masukan Text/.test(update.message.reply_to_message.text || "")
+  /Masukan Text/i.test(update.message.reply_to_message.text || "")
 ) {
   const code = text.trim();
   if (code) {
@@ -148,7 +148,7 @@ if (
 
 if (
   update.message.reply_to_message &&
-  /Masukan Code Base64/.test(update.message.reply_to_message.text || "")
+  /Masukan Code Base64/i.test(update.message.reply_to_message.text || "")
 ) {
   const code = text.trim();
   if (code) {
