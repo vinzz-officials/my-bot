@@ -1,7 +1,3 @@
-import axios from "axios";
-import FormData from "form-data";
-import { fromBuffer } from "file-type";
-
 export default async function handler(req, res) {
   // === CONFIG ===
   const TOKEN = process.env.TG_TOKEN || "8396430373:AAE4BhMcJ0xl5V71sM55Dl2RQLIuNDBDTpQ";
