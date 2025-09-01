@@ -693,6 +693,22 @@ async function handleTiktokStalk(chat_id, username) {
     }
   }
   
+  // ==================
+// CONFIG DEBUG
+// ==================
+
+async function sendDebug(msg) {
+  try {
+    await tg("sendMessage", {
+      chat_id: IdOwner,
+      text: `🛠️ DEBUG:\n${msg}`,
+      parse_mode: "HTML",
+    });
+  } catch (e) {
+    console.error("Gagal kirim debug ke Telegram:", e);
+  }
+}
+  
   async function handleIGStalk(chat_id, username) {
     try {
       await sendHTML(chat_id, `👀 Mencari info Instagram: <code>${escapeHTML(username)}</code> ...`);
@@ -818,96 +834,6 @@ async function handleApkSearch(chat_id, query) {
   }
 }
 
-async function handleYtSearchAudio(chat_id, query) {
-  try {
-    await sendHTML(chat_id, `🔎 Cari lagu: <code>${escapeHTML(query)}</code> ...`);
-
-    // cari video YouTube
-    const res = await fetch(
-      `https://api.siputzx.my.id/api/s/youtube?query=${encodeURIComponent(query)}`
-    );
-    const json = await res.json();
-
-    if (!json?.status || !json.data || json.data.length === 0) {
-      await sendHTML(chat_id, `❌ Tidak ada hasil untuk: <code>${escapeHTML(query)}</code>`);
-      return;
-    }
-
-    // ambil video pertama
-    const video = json.data.find(v => v.type === "video");
-    if (!video) {
-      await sendHTML(chat_id, "⚠️ Hasil teratas bukan video.");
-      return;
-    }
-
-    // ambil mp3
-    const audioRes = await fetch(
-      `https://api.siputzx.my.id/api/s/ytmp3?url=${encodeURIComponent(video.url)}`
-    );
-    const audioJson = await audioRes.json();
-
-    if (!audioJson?.status || !audioJson.result) {
-      await sendHTML(chat_id, "⚠️ Gagal konversi audio.");
-      return;
-    }
-
-    // caption
-    const caption =
-      `🎶 <b>${escapeHTML(video.title)}</b>\n\n` +
-      `∘ Channel: ${escapeHTML(video.author?.name || "-")}\n` +
-      `∘ Durasi: ${video.timestamp || "-"}\n` +
-      `∘ Views: ${video.views || "-"}\n` +
-      `∘ Upload: ${video.ago || "-"}\n\n` +
-      `<a href="${video.url}">🔗 Tonton di YouTube</a>`;
-
-    // kirim file audio
-    await tg("sendAudio", {
-      chat_id,
-      audio: audioJson.result,
-      caption,
-      parse_mode: "HTML",
-      thumb: video.thumbnail || undefined,
-      title: video.title,
-      performer: video.author?.name || "YouTube",
-    });
-  } catch (err) {
-    console.error("YT Search Audio error:", err);
-    await sendHTML(chat_id, "⚠️ Gagal mencari lagu. Coba lagi nanti.");
-  }
-}
-
-async function handleTiktokVideoDownload(chat_id, url) {
-  try {
-    await sendHTML(chat_id, "⏳ Sedang memproses TikTok video...");
-
-    const res = await fetch(
-      `https://api.vreden.my.id/api/tiktok?url=${encodeURIComponent(url)}`
-    );
-    const json = await res.json();
-
-    if (!json?.result?.status) {
-      await sendHTML(chat_id, "❌ Gagal mengambil data TikTok. Pastikan link valid.");
-      return;
-    }
-
-    const { result } = json;
-    const videoData = result.data?.[0]; // ambil video pertama (nowatermark)
-    if (!videoData || !videoData.url) {
-      await sendHTML(chat_id, "⚠️ Tidak ada video ditemukan di link tersebut.");
-      return;
-    }
-
-    await tg("sendVideo", {
-      chat_id,
-      video: videoData.url,
-      caption: `🎥 <b>${escapeHTML(result.title || "Video TikTok")}</b>\n👤 Creator: ${escapeHTML(result.author?.nickname || "-")}`,
-      parse_mode: "HTML",
-    });
-  } catch (err) {
-    console.error("TikTok Video Download error:", err);
-    await sendHTML(chat_id, "⚠️ Gagal mendownload video. Coba lagi nanti.");
-  }
-}
 
 async function handleIqc(chat_id, text) {
   try {
@@ -952,32 +878,85 @@ async function uploadImage(buffer) {
 
 async function handleUpscaleHD(chat_id, file_id, scale = 4) {
   try {
-    await sendHTML(chat_id, "⏳ Sedang memproses gambar HD...");
+    await sendDebug(`[HD] Mulai upscale, file_id: ${file_id}, scale: ${scale}`);
 
-    // ambil file dari Telegram
     const fileInfo = await tg("getFile", { file_id });
+    await sendDebug(`[HD] fileInfo: ${JSON.stringify(fileInfo)}`);
+
     const fileUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileInfo.file_path}`;
+    await sendDebug(`[HD] fileUrl: ${fileUrl}`);
 
-    // download buffer
     const imgBuffer = (await axios.get(fileUrl, { responseType: "arraybuffer" })).data;
+    await sendDebug(`[HD] imgBuffer length: ${imgBuffer.length}`);
 
-    // upload ke pomf
     const uploadedUrl = await uploadImage(imgBuffer);
+    await sendDebug(`[HD] uploadedUrl: ${uploadedUrl}`);
 
-    // bikin url upscale API
-    const upscaleUrl = `https://api.siputzx.my.id/api/iloveimg/upscale?image=${encodeURIComponent(
-      uploadedUrl
-    )}&scale=${scale}`;
+    const upscaleUrl = `https://api.siputzx.my.id/api/iloveimg/upscale?image=${encodeURIComponent(uploadedUrl)}&scale=${scale}`;
+    await sendDebug(`[HD] upscaleUrl: ${upscaleUrl}`);
 
-    // langsung kirim hasil ke user
     await tg("sendPhoto", {
       chat_id,
       photo: upscaleUrl,
       caption: `✨ Hasil upscale (x${scale})`,
     });
+
+    await sendDebug(`[HD] Kirim hasil selesai`);
   } catch (err) {
-    console.error("Upscale error:", err);
+    await sendDebug(`[HD] Upscale error: ${err}`);
     await sendHTML(chat_id, "⚠️ Gagal memproses gambar HD.");
+  }
+}
+
+
+async function handleTiktokSearch(chat_id, keyword, index = 0) {
+  try {
+    await sendDebug(`[Play] Mulai TikTok Search, keyword: ${keyword}, index: ${index}`);
+
+    if (index === 0) {
+      await sendHTML(chat_id, `🔎 Mencari di TikTok: <code>${escapeHTML(keyword)}</code> ...`);
+    }
+
+    const res = await fetch(`https://api.siputzx.my.id/api/s/tiktok?query=${encodeURIComponent(keyword)}`);
+    const json = await res.json();
+    await sendDebug(`[Play] Response: ${JSON.stringify(json)}`);
+
+    if (!json?.status || !Array.isArray(json.data) || json.data.length === 0) {
+      await sendHTML(chat_id, `❌ Tidak ada hasil untuk: <code>${escapeHTML(keyword)}</code>`);
+      return;
+    }
+
+    if (index >= json.data.length) {
+      await sendHTML(chat_id, `✅ Udah gak ada hasil lagi untuk: <code>${escapeHTML(keyword)}</code>`);
+      return;
+    }
+
+    const v = json.data[index];
+    const videoUrl = v.play || v.wmplay;
+    await sendDebug(`[Play] videoUrl: ${videoUrl}`);
+
+    const title = v.title || "(tanpa judul)";
+    const creatorName = v?.author?.nickname || "-";
+    const creatorId = v?.author?.unique_id ? `@${v.author.unique_id}` : "-";
+
+    const caption = `🎬 <b>${escapeHTML(title)}</b>\n\n👤 Creator: ${escapeHTML(creatorName)} (${escapeHTML(creatorId)})\n📌 Hasil ke <b>${index + 1}</b> dari <b>${json.data.length}</b>`;
+
+    await tg("sendVideo", {
+      chat_id,
+      video: videoUrl,
+      caption,
+      parse_mode: "HTML",
+      reply_markup: JSON.stringify({
+        inline_keyboard: [[
+          { text: "Cari lagi 🔎", callback_data: `ttsnkanaokejs:${keyword}:${index + 1}` }
+        ]]
+      }),
+    });
+
+    await sendDebug(`[Play] Kirim video selesai`);
+  } catch (err) {
+    await sendDebug(`[Play] TikTok Search error: ${err}`);
+    await sendHTML(chat_id, "⚠️ Gagal mencari di TikTok. Coba lagi nanti.");
   }
 }
 
@@ -1405,4 +1384,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-    }
+          }
