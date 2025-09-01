@@ -53,10 +53,14 @@ export default async function handler(req, res) {
 
 if (
   update.message.reply_to_message &&
-  /YouTube Search/.test(update.message.reply_to_message.text || "")
+  /YouTube Search/i.test(update.message.reply_to_message.text || "")
 ) {
   const keyword = text.trim();
-  await handleYtSearchAudio(chat_id, keyword);
+  if (keyword) {
+    await handleYtSearchAudio(chat_id, keyword);
+  } else {
+    await sendHTML(chat_id, "⚠️ Kata kunci kosong, coba lagi.");
+  }
   return ok(res);
 }
 
@@ -288,7 +292,7 @@ if (data === "base642text_page2") {
 if (data === "ytsearch_feature_page2") {
   await tg("sendMessage", {
     chat_id,
-    text: "🎶 <b>YouTube Search</b>\nKetik judul lagu/video yang mau dicari:",
+    text: "🎶 <b>YouTube Search </b>\nKetik judul lagu/video yang mau dicari:",
     parse_mode: "HTML",
     reply_markup: JSON.stringify({ force_reply: true, selective: true }),
   });
@@ -751,6 +755,41 @@ async function sendDebug(msg) {
       await sendHTML(chat_id, "⚠️ Gagal mengambil data IG. Coba lagi nanti.");
     }
   }
+  
+  async function handleYtSearchAudio(chat_id, keyword) {
+  try {
+    await sendHTML(chat_id, `🔎 Mencari YouTube: <code>${escapeHTML(keyword)}</code> ...`);
+
+    const res = await fetch(`https://api.siputzx.my.id/api/s/youtube?query=${encodeURIComponent(keyword)}`);
+    const json = await res.json();
+
+    if (!json?.status || !Array.isArray(json.data) || json.data.length === 0) {
+      await sendHTML(chat_id, `❌ Tidak ada hasil untuk: <code>${escapeHTML(keyword)}</code>`);
+      return;
+    }
+
+    // Ambil hasil pertama yang tipe video
+    const video = json.data.find(v => v.type === "video");
+    if (!video) {
+      await sendHTML(chat_id, "⚠️ Tidak ada video yang bisa diputar.");
+      return;
+    }
+
+    const caption = `🎶 <b>${escapeHTML(video.title)}</b>\n👤 Channel: ${escapeHTML(video.author.name)}\n⏱️ Durasi: ${video.timestamp}\n👁️ Views: ${video.views}`;
+
+    // Kirim link video atau audio (kalau audio tersedia)
+    await tg("sendMessage", {
+      chat_id,
+      text: `<a href="${video.url}">🎵 ${escapeHTML(video.title)}</a>`,
+      parse_mode: "HTML",
+      disable_web_page_preview: false
+    });
+
+  } catch (err) {
+    console.error("YouTube Search error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal memproses YouTube. Coba lagi nanti.");
+  }
+}
  
   async function handleTiktokSearch(chat_id, keyword, index = 0) {
   try {
@@ -859,18 +898,19 @@ async function handleIqc(chat_id, text) {
 }
 
 
-
-// upload image ke pomf
-async function uploadImage(buffer) {
-  const { ext, mime } = (await fromBuffer(buffer)) || {};
+async function uploadImage(imgBuffer) {
+  const { ext, mime } = (await fromBuffer(imgBuffer)) || {};
   const form = new FormData();
-  form.append("files[]", buffer, {
+  form.append("files[]", imgBuffer, {
     filename: `tmp.${ext}`,
     contentType: mime,
   });
 
-  const { data } = await axios.post("https://pomf.lain.la/upload.php", form, {
-    headers: form.getHeaders(),
+  const { data } = await axios.post("https://catbox.moe/user/api.php", form, {
+    headers: {
+      ...form.getHeaders(),
+      "User-Agent": "Mozilla/5.0", // biar aman
+    },
   });
 
   return data.files[0].url;
@@ -909,56 +949,6 @@ async function handleUpscaleHD(chat_id, file_id, scale = 4) {
 }
 
 
-async function handleTiktokSearch(chat_id, keyword, index = 0) {
-  try {
-    await sendDebug(`[Play] Mulai TikTok Search, keyword: ${keyword}, index: ${index}`);
-
-    if (index === 0) {
-      await sendHTML(chat_id, `🔎 Mencari di TikTok: <code>${escapeHTML(keyword)}</code> ...`);
-    }
-
-    const res = await fetch(`https://api.siputzx.my.id/api/s/tiktok?query=${encodeURIComponent(keyword)}`);
-    const json = await res.json();
-    await sendDebug(`[Play] Response: ${JSON.stringify(json)}`);
-
-    if (!json?.status || !Array.isArray(json.data) || json.data.length === 0) {
-      await sendHTML(chat_id, `❌ Tidak ada hasil untuk: <code>${escapeHTML(keyword)}</code>`);
-      return;
-    }
-
-    if (index >= json.data.length) {
-      await sendHTML(chat_id, `✅ Udah gak ada hasil lagi untuk: <code>${escapeHTML(keyword)}</code>`);
-      return;
-    }
-
-    const v = json.data[index];
-    const videoUrl = v.play || v.wmplay;
-    await sendDebug(`[Play] videoUrl: ${videoUrl}`);
-
-    const title = v.title || "(tanpa judul)";
-    const creatorName = v?.author?.nickname || "-";
-    const creatorId = v?.author?.unique_id ? `@${v.author.unique_id}` : "-";
-
-    const caption = `🎬 <b>${escapeHTML(title)}</b>\n\n👤 Creator: ${escapeHTML(creatorName)} (${escapeHTML(creatorId)})\n📌 Hasil ke <b>${index + 1}</b> dari <b>${json.data.length}</b>`;
-
-    await tg("sendVideo", {
-      chat_id,
-      video: videoUrl,
-      caption,
-      parse_mode: "HTML",
-      reply_markup: JSON.stringify({
-        inline_keyboard: [[
-          { text: "Cari lagi 🔎", callback_data: `ttsnkanaokejs:${keyword}:${index + 1}` }
-        ]]
-      }),
-    });
-
-    await sendDebug(`[Play] Kirim video selesai`);
-  } catch (err) {
-    await sendDebug(`[Play] TikTok Search error: ${err}`);
-    await sendHTML(chat_id, "⚠️ Gagal mencari di TikTok. Coba lagi nanti.");
-  }
-}
 
 async function handleTiktokPhotoDownload(chat_id, url) {
   try {
@@ -1384,4 +1374,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-          }
+}
