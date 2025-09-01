@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   const OWNER_CONTACT = "@vinzz_official_store";
   const IdOwner = "7777604508";
   const WHATSAPP_CONTACT = "wa.me/62815247824152";
-  
+
   const API = `https://api.telegram.org/bot${TOKEN}`;
 
   if (req.method !== "POST") {
@@ -51,19 +51,6 @@ export default async function handler(req, res) {
   return ok(res);
 }
 
-if (
-  update.message.reply_to_message &&
-  /YouTube Search/i.test(update.message.reply_to_message.text || "")
-) {
-  const keyword = text.trim();
-  if (keyword) {
-    await handleYtSearchAudio(chat_id, keyword);
-  } else {
-    await sendHTML(chat_id, "⚠️ Kata kunci kosong, coba lagi.");
-  }
-  return ok(res);
-}
-
 if (update.message.reply_to_message) {
   const repliedText = update.message.reply_to_message.text || "";
   const url = text.trim();
@@ -87,15 +74,6 @@ if (update.message.reply_to_message) {
 if (update.message.reply_to_message && /Cek Host/.test(update.message.reply_to_message.text || "")) {
   const targetUrl = text.trim();
   await handleCekHost(chat_id, targetUrl);
-  return ok(res);
-}
-
-if (update.message.photo) {
-  const chat_id = update.message.chat.id;
-  const photos = update.message.photo;
-  const file_id = photos[photos.length - 1].file_id; // ambil resolusi terbesar
-
-  await handleUpscaleHD(chat_id, file_id); 
   return ok(res);
 }
 
@@ -289,16 +267,6 @@ if (data === "base642text_page2") {
   return ok(res);
 }
 
-if (data === "ytsearch_feature_page2") {
-  await tg("sendMessage", {
-    chat_id,
-    text: "🎶 <b>YouTube Search </b>\nKetik judul lagu/video yang mau dicari:",
-    parse_mode: "HTML",
-    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
-  });
-  return ok(res);
-}
-
 if (data === "ytaknskandj") {
   await tg("sendMessage", {
     chat_id,
@@ -319,16 +287,6 @@ if (data === "ytaknskandj") {
         });
         return ok(res);
       }
-      
-      if (data === "hdimage_feature_page2") {
-  await tg("sendMessage", {
-    chat_id,
-    text: "🖼 <b>HD Upscale</b>\nKirim foto yang ingin diubah ke HD.",
-    parse_mode: "HTML",
-    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
-  });
-  return ok(res);
-}
       
       if (data === "tikkbakakwnjs") {
         await tg("sendMessage", {
@@ -356,7 +314,7 @@ await editOrSend(
           chat_id,
           message_id,
           `🧩 <b>Fitur</b>\n\n` +
-            `• Cek Host\n` + `• Text to Base64\n` + `• Base64 to Text\n` + `• IQC (Iphone quote caption)\n` + `• Play\n` + `• HD image\n`,
+            `• Cek Host\n` + `• Text to Base64\n` + `• Base64 to Text\n` + `• IQC (Iphone quote caption)`,
           featuresKeyboard1()
         );
         return ok(res);
@@ -588,10 +546,6 @@ function featuresKeyboard1() {
       { text: "🔧 Base64 to Text", callback_data: "base642text_page2" },
   { text: "📱 iPhone Quote", callback_data: "iqc_feature_page2" }
     ],
-    [ 
-    { text: "▶️Play", callback_data: "ytsearch_feature_page2" },
-    { text: "🖼️ HD", callback_data: "hdimage_feature_page2" }
- ],
         [
       { text: "⬅️", callback_data: "fitur_page1" },
       { text: "2/2", callback_data: "fitur_page_info" },
@@ -697,22 +651,6 @@ async function handleTiktokStalk(chat_id, username) {
     }
   }
   
-  // ==================
-// CONFIG DEBUG
-// ==================
-
-async function sendDebug(msg) {
-  try {
-    await tg("sendMessage", {
-      chat_id: IdOwner,
-      text: `🛠️ DEBUG:\n${msg}`,
-      parse_mode: "HTML",
-    });
-  } catch (e) {
-    console.error("Gagal kirim debug ke Telegram:", e);
-  }
-}
-  
   async function handleIGStalk(chat_id, username) {
     try {
       await sendHTML(chat_id, `👀 Mencari info Instagram: <code>${escapeHTML(username)}</code> ...`);
@@ -755,41 +693,6 @@ async function sendDebug(msg) {
       await sendHTML(chat_id, "⚠️ Gagal mengambil data IG. Coba lagi nanti.");
     }
   }
-  
-  async function handleYtSearchAudio(chat_id, keyword) {
-  try {
-    await sendHTML(chat_id, `🔎 Mencari YouTube: <code>${escapeHTML(keyword)}</code> ...`);
-
-    const res = await fetch(`https://api.siputzx.my.id/api/s/youtube?query=${encodeURIComponent(keyword)}`);
-    const json = await res.json();
-
-    if (!json?.status || !Array.isArray(json.data) || json.data.length === 0) {
-      await sendHTML(chat_id, `❌ Tidak ada hasil untuk: <code>${escapeHTML(keyword)}</code>`);
-      return;
-    }
-
-    // Ambil hasil pertama yang tipe video
-    const video = json.data.find(v => v.type === "video");
-    if (!video) {
-      await sendHTML(chat_id, "⚠️ Tidak ada video yang bisa diputar.");
-      return;
-    }
-
-    const caption = `🎶 <b>${escapeHTML(video.title)}</b>\n👤 Channel: ${escapeHTML(video.author.name)}\n⏱️ Durasi: ${video.timestamp}\n👁️ Views: ${video.views}`;
-
-    // Kirim link video atau audio (kalau audio tersedia)
-    await tg("sendMessage", {
-      chat_id,
-      text: `<a href="${video.url}">🎵 ${escapeHTML(video.title)}</a>`,
-      parse_mode: "HTML",
-      disable_web_page_preview: false
-    });
-
-  } catch (err) {
-    console.error("YouTube Search error:", err);
-    await sendHTML(chat_id, "⚠️ Gagal memproses YouTube. Coba lagi nanti.");
-  }
-}
  
   async function handleTiktokSearch(chat_id, keyword, index = 0) {
   try {
@@ -874,6 +777,39 @@ async function handleApkSearch(chat_id, query) {
 }
 
 
+async function handleTiktokVideoDownload(chat_id, url) {
+  try {
+    await sendHTML(chat_id, "⏳ Sedang memproses TikTok video...");
+
+    const res = await fetch(
+      `https://api.vreden.my.id/api/tiktok?url=${encodeURIComponent(url)}`
+    );
+    const json = await res.json();
+
+    if (!json?.result?.status) {
+      await sendHTML(chat_id, "❌ Gagal mengambil data TikTok. Pastikan link valid.");
+      return;
+    }
+
+    const { result } = json;
+    const videoData = result.data?.[0]; // ambil video pertama (nowatermark)
+    if (!videoData || !videoData.url) {
+      await sendHTML(chat_id, "⚠️ Tidak ada video ditemukan di link tersebut.");
+      return;
+    }
+
+    await tg("sendVideo", {
+      chat_id,
+      video: videoData.url,
+      caption: `🎥 <b>${escapeHTML(result.title || "Video TikTok")}</b>\n👤 Creator: ${escapeHTML(result.author?.nickname || "-")}`,
+      parse_mode: "HTML",
+    });
+  } catch (err) {
+    console.error("TikTok Video Download error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal mendownload video. Coba lagi nanti.");
+  }
+}
+
 async function handleIqc(chat_id, text) {
   try {
     const time = new Intl.DateTimeFormat("id-ID", {
@@ -896,59 +832,6 @@ async function handleIqc(chat_id, text) {
     await sendHTML(chat_id, "⚠️ Gagal membuat iPhone Quote. Coba lagi nanti.");
   }
 }
-
-
-async function uploadImage(imgBuffer) {
-  const { ext, mime } = (await fromBuffer(imgBuffer)) || {};
-  const form = new FormData();
-  form.append("files[]", imgBuffer, {
-    filename: `tmp.${ext}`,
-    contentType: mime,
-  });
-
-  const { data } = await axios.post("https://catbox.moe/user/api.php", form, {
-    headers: {
-      ...form.getHeaders(),
-      "User-Agent": "Mozilla/5.0", // biar aman
-    },
-  });
-
-  return data.files[0].url;
-}
-
-async function handleUpscaleHD(chat_id, file_id, scale = 4) {
-  try {
-    await sendDebug(`[HD] Mulai upscale, file_id: ${file_id}, scale: ${scale}`);
-
-    const fileInfo = await tg("getFile", { file_id });
-    await sendDebug(`[HD] fileInfo: ${JSON.stringify(fileInfo)}`);
-
-    const fileUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileInfo.file_path}`;
-    await sendDebug(`[HD] fileUrl: ${fileUrl}`);
-
-    const imgBuffer = (await axios.get(fileUrl, { responseType: "arraybuffer" })).data;
-    await sendDebug(`[HD] imgBuffer length: ${imgBuffer.length}`);
-
-    const uploadedUrl = await uploadImage(imgBuffer);
-    await sendDebug(`[HD] uploadedUrl: ${uploadedUrl}`);
-
-    const upscaleUrl = `https://api.siputzx.my.id/api/iloveimg/upscale?image=${encodeURIComponent(uploadedUrl)}&scale=${scale}`;
-    await sendDebug(`[HD] upscaleUrl: ${upscaleUrl}`);
-
-    await tg("sendPhoto", {
-      chat_id,
-      photo: upscaleUrl,
-      caption: `✨ Hasil upscale (x${scale})`,
-    });
-
-    await sendDebug(`[HD] Kirim hasil selesai`);
-  } catch (err) {
-    await sendDebug(`[HD] Upscale error: ${err}`);
-    await sendHTML(chat_id, "⚠️ Gagal memproses gambar HD.");
-  }
-}
-
-
 
 async function handleTiktokPhotoDownload(chat_id, url) {
   try {
@@ -1374,4 +1257,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-}
+      }
