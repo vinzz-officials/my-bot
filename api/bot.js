@@ -5,6 +5,10 @@ export default async function handler(req, res) {
   const OWNER_CONTACT = "@vinzz_official_store";
   const IdOwner = "7777604508";
   const WHATSAPP_CONTACT = "wa.me/62815247824152";
+  
+  import axios from "axios";
+import FormData from "form-data";
+import { fromBuffer } from "file-type";
 
   const API = `https://api.telegram.org/bot${TOKEN}`;
 
@@ -51,6 +55,15 @@ export default async function handler(req, res) {
   return ok(res);
 }
 
+if (
+  update.message.reply_to_message &&
+  /YouTube Search/.test(update.message.reply_to_message.text || "")
+) {
+  const keyword = text.trim();
+  await handleYtSearchAudio(chat_id, keyword);
+  return ok(res);
+}
+
 if (update.message.reply_to_message) {
   const repliedText = update.message.reply_to_message.text || "";
   const url = text.trim();
@@ -74,6 +87,15 @@ if (update.message.reply_to_message) {
 if (update.message.reply_to_message && /Cek Host/.test(update.message.reply_to_message.text || "")) {
   const targetUrl = text.trim();
   await handleCekHost(chat_id, targetUrl);
+  return ok(res);
+}
+
+if (update.message.photo) {
+  const chat_id = update.message.chat.id;
+  const photos = update.message.photo;
+  const file_id = photos[photos.length - 1].file_id; // ambil resolusi terbesar
+
+  await handleUpscaleHD(chat_id, file_id); 
   return ok(res);
 }
 
@@ -267,6 +289,16 @@ if (data === "base642text_page2") {
   return ok(res);
 }
 
+if (data === "ytsearch_feature_page2") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "🎶 <b>YouTube Search</b>\nKetik judul lagu/video yang mau dicari:",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
+
 if (data === "ytaknskandj") {
   await tg("sendMessage", {
     chat_id,
@@ -287,6 +319,16 @@ if (data === "ytaknskandj") {
         });
         return ok(res);
       }
+      
+      if (data === "hdimage_feature_page2") {
+  await tg("sendMessage", {
+    chat_id,
+    text: "🖼 <b>HD Upscale</b>\nKirim foto yang ingin diubah ke HD.",
+    parse_mode: "HTML",
+    reply_markup: JSON.stringify({ force_reply: true, selective: true }),
+  });
+  return ok(res);
+}
       
       if (data === "tikkbakakwnjs") {
         await tg("sendMessage", {
@@ -314,7 +356,7 @@ await editOrSend(
           chat_id,
           message_id,
           `🧩 <b>Fitur</b>\n\n` +
-            `• Cek Host\n` + `• Text to Base64\n` + `• Base64 to Text\n` + `• IQC (Iphone quote caption)`,
+            `• Cek Host\n` + `• Text to Base64\n` + `• Base64 to Text\n` + `• IQC (Iphone quote caption)\n` + `• Play\n` + `• HD image\n`,
           featuresKeyboard1()
         );
         return ok(res);
@@ -546,6 +588,10 @@ function featuresKeyboard1() {
       { text: "🔧 Base64 to Text", callback_data: "base642text_page2" },
   { text: "📱 iPhone Quote", callback_data: "iqc_feature_page2" }
     ],
+    [ 
+    { text: "▶️Play", callback_data: "ytsearch_feature_page2" },
+    { text: "🖼️ HD", callback_data: "hdimage_feature_page2" }
+ ],
         [
       { text: "⬅️", callback_data: "fitur_page1" },
       { text: "2/2", callback_data: "fitur_page_info" },
@@ -776,6 +822,63 @@ async function handleApkSearch(chat_id, query) {
   }
 }
 
+async function handleYtSearchAudio(chat_id, query) {
+  try {
+    await sendHTML(chat_id, `🔎 Cari lagu: <code>${escapeHTML(query)}</code> ...`);
+
+    // cari video YouTube
+    const res = await fetch(
+      `https://api.siputzx.my.id/api/s/youtube?query=${encodeURIComponent(query)}`
+    );
+    const json = await res.json();
+
+    if (!json?.status || !json.data || json.data.length === 0) {
+      await sendHTML(chat_id, `❌ Tidak ada hasil untuk: <code>${escapeHTML(query)}</code>`);
+      return;
+    }
+
+    // ambil video pertama
+    const video = json.data.find(v => v.type === "video");
+    if (!video) {
+      await sendHTML(chat_id, "⚠️ Hasil teratas bukan video.");
+      return;
+    }
+
+    // ambil mp3
+    const audioRes = await fetch(
+      `https://api.siputzx.my.id/api/s/ytmp3?url=${encodeURIComponent(video.url)}`
+    );
+    const audioJson = await audioRes.json();
+
+    if (!audioJson?.status || !audioJson.result) {
+      await sendHTML(chat_id, "⚠️ Gagal konversi audio.");
+      return;
+    }
+
+    // caption
+    const caption =
+      `🎶 <b>${escapeHTML(video.title)}</b>\n\n` +
+      `∘ Channel: ${escapeHTML(video.author?.name || "-")}\n` +
+      `∘ Durasi: ${video.timestamp || "-"}\n` +
+      `∘ Views: ${video.views || "-"}\n` +
+      `∘ Upload: ${video.ago || "-"}\n\n` +
+      `<a href="${video.url}">🔗 Tonton di YouTube</a>`;
+
+    // kirim file audio
+    await tg("sendAudio", {
+      chat_id,
+      audio: audioJson.result,
+      caption,
+      parse_mode: "HTML",
+      thumb: video.thumbnail || undefined,
+      title: video.title,
+      performer: video.author?.name || "YouTube",
+    });
+  } catch (err) {
+    console.error("YT Search Audio error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal mencari lagu. Coba lagi nanti.");
+  }
+}
 
 async function handleTiktokVideoDownload(chat_id, url) {
   try {
@@ -830,6 +933,55 @@ async function handleIqc(chat_id, text) {
   } catch (err) {
     console.error("iPhone Quote error:", err);
     await sendHTML(chat_id, "⚠️ Gagal membuat iPhone Quote. Coba lagi nanti.");
+  }
+}
+
+
+
+// upload image ke pomf
+async function uploadImage(buffer) {
+  const { ext, mime } = (await fromBuffer(buffer)) || {};
+  const form = new FormData();
+  form.append("files[]", buffer, {
+    filename: `tmp.${ext}`,
+    contentType: mime,
+  });
+
+  const { data } = await axios.post("https://pomf.lain.la/upload.php", form, {
+    headers: form.getHeaders(),
+  });
+
+  return data.files[0].url;
+}
+
+async function handleUpscaleHD(chat_id, file_id, scale = 4) {
+  try {
+    await sendHTML(chat_id, "⏳ Sedang memproses gambar HD...");
+
+    // ambil file dari Telegram
+    const fileInfo = await tg("getFile", { file_id });
+    const fileUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileInfo.file_path}`;
+
+    // download buffer
+    const imgBuffer = (await axios.get(fileUrl, { responseType: "arraybuffer" })).data;
+
+    // upload ke pomf
+    const uploadedUrl = await uploadImage(imgBuffer);
+
+    // bikin url upscale API
+    const upscaleUrl = `https://api.siputzx.my.id/api/iloveimg/upscale?image=${encodeURIComponent(
+      uploadedUrl
+    )}&scale=${scale}`;
+
+    // langsung kirim hasil ke user
+    await tg("sendPhoto", {
+      chat_id,
+      photo: upscaleUrl,
+      caption: `✨ Hasil upscale (x${scale})`,
+    });
+  } catch (err) {
+    console.error("Upscale error:", err);
+    await sendHTML(chat_id, "⚠️ Gagal memproses gambar HD.");
   }
 }
 
@@ -1257,4 +1409,4 @@ async function handleYtMp3Download(chat_id, url) {
   function ok(res) {
     return res.status(200).json({ ok: true });
   }
-          }
+    }
