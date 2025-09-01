@@ -1,3 +1,7 @@
+import axios from "axios";
+import FormData from "form-data";
+import { fromBuffer } from "file-type";
+
 export default async function handler(req, res) {
   // === CONFIG ===
   const TOKEN = process.env.TG_TOKEN || "8396430373:AAE4BhMcJ0xl5V71sM55Dl2RQLIuNDBDTpQ";
@@ -6,10 +10,6 @@ export default async function handler(req, res) {
   const IdOwner = "7777604508";
   const WHATSAPP_CONTACT = "wa.me/62815247824152";
   
-  import axios from "axios";
-import FormData from "form-data";
-import { fromBuffer } from "file-type";
-
   const API = `https://api.telegram.org/bot${TOKEN}`;
 
   if (req.method !== "POST") {
