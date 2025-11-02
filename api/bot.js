@@ -497,7 +497,7 @@ if (data.startsWith("ttsnkanaokejs:")) {
       ],
       [
         { text: "👤 Owner", callback_data: "owksnwikwns" },
-        { text: "🪀 Whatsapp", url: "https://wa.me/62815247824152" },
+        { text: "🪀 Whatsapp", url: "https://wa.me/6285185667890" },
       ],
       [
        { text: "🌟 Rate", callback_data: "ratjwjnsjsjs" },
